@@ -2,6 +2,7 @@ gem 'minitest'
 require 'minitest/spec'
 require 'minitest/autorun'
 require 'yaml'
+require_relative 'gmail_client'
 
 describe "CI end-end" do
   let(:application) { ApplicationRunner.new }
@@ -23,6 +24,8 @@ describe "CI end-end" do
     application.add_job(job_name: 'unit-tests',
                         script: 'rake',
                         repository: repository_url)
+
+    mail_client.connect
     bad_commit_id = repository.push_bad_commit
     mail_client.receives_failure_notification_about_commit_id(bad_commit_id)
   end
@@ -32,12 +35,19 @@ describe "CI end-end" do
       # load up the server - rack?
     end
 
+    def stop
+    end
+
     def add_job(*)
       # some capybara stuff
     end
   end
 
   class Repository
+    def initialize(options)
+    end
 
+    def push_bad_commit
+    end
   end
 end
