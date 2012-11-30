@@ -22,6 +22,7 @@ class GMailClient
   end
 
   def logout
+    @gmail.logout
   end
 
   private

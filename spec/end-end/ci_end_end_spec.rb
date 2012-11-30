@@ -2,52 +2,39 @@ gem 'minitest'
 require 'minitest/spec'
 require 'minitest/autorun'
 require 'yaml'
-require_relative 'gmail_client'
+require_relative '../support/application_runner'
+require_relative '../support/gmail_client'
+require_relative '../support/git_repository'
 
 describe "CI end-end" do
   let(:application) { ApplicationRunner.new }
   let(:repository_url) { 'https://github.com/camelpunch/ci_test_repo.git' }
   let(:repository) {
-    Repository.new(committer: gmail_config['email'],
-                   url: repository_url)
+    GitRepository.new(committer: mail_config['email'],
+                      url: repository_url)
   }
-  let(:gmail_config) { YAML.load_file(File.expand_path('../gmail_config.yml', __FILE__)) }
-  let(:mail_client) { GMailClient.new(gmail_config) }
+  let(:mail_config) {
+    YAML.load_file(File.expand_path('../../support/gmail_config.yml', __FILE__))
+  }
+  let(:mail_client) { GMailClient.new(mail_config) }
 
   after do
     application.stop
     mail_client.logout
   end
 
-  it "emails developers about their failed commits (assuming one-commit-per-push)" do
+  it "emails developers about their failed commits" do
+    pipeline_name = 'myapp-deployment'
+
     application.start
-    application.add_job(job_name: 'unit-tests',
+    application.add_pipeline(pipeline_name)
+    application.add_job('unit-tests',
+                        pipeline: pipeline_name,
                         script: 'rake',
                         repository: repository_url)
-
     mail_client.connect
-    bad_commit_id = repository.push_bad_commit
+    bad_commit_id = repository.push_bad_commit(author: mail_config['email'])
+    application.run_pipeline(pipeline_name)
     mail_client.receives_failure_notification_about_commit_id(bad_commit_id)
-  end
-
-  class ApplicationRunner
-    def start
-      # load up the server - rack?
-    end
-
-    def stop
-    end
-
-    def add_job(*)
-      # some capybara stuff
-    end
-  end
-
-  class Repository
-    def initialize(options)
-    end
-
-    def push_bad_commit
-    end
   end
 end
