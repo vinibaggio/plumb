@@ -2,25 +2,30 @@ gem 'minitest'
 require 'minitest/spec'
 require 'minitest/autorun'
 require 'yaml'
+require 'pathname'
 require_relative '../support/application_runner'
 require_relative '../support/gmail_client'
 require_relative '../support/git_repository'
 
+require 'debugger'
+
 describe "CI end-end" do
+  def support_path
+    Pathname.new(File.expand_path('../../support/', __FILE__))
+  end
+
   let(:application) { ApplicationRunner.new }
-  let(:repository_url) { 'https://github.com/camelpunch/ci_test_repo.git' }
+  let(:repository_url) { support_path.join('example_git_repo') }
   let(:repository) {
-    GitRepository.new(committer: mail_config['email'],
-                      url: repository_url)
+    GitRepository.new(author: mail_config['email'])
   }
-  let(:mail_config) {
-    YAML.load_file(File.expand_path('../../support/gmail_config.yml', __FILE__))
-  }
+  let(:mail_config) { YAML.load_file(support_path.join('gmail_config.yml')) }
   let(:mail_client) { GMailClient.new(mail_config) }
 
   after do
     application.stop
     mail_client.logout
+    repository.destroy
   end
 
   it "emails developers about their failed commits" do
@@ -28,12 +33,14 @@ describe "CI end-end" do
 
     application.start
     application.add_pipeline(pipeline_name)
+
+    repository.create
     application.add_job('unit-tests',
                         pipeline: pipeline_name,
                         script: 'rake',
                         repository: repository_url)
     mail_client.connect
-    bad_commit_id = repository.push_bad_commit(author: mail_config['email'])
+    bad_commit_id = repository.create_bad_commit
     application.run_pipeline(pipeline_name)
     mail_client.receives_failure_notification_about_commit_id(bad_commit_id)
   end

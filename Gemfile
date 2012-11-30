@@ -1,8 +1,9 @@
 source "https://rubygems.org"
 
-gem 'hooves'
-
 group :test do
+  gem 'debugger'
+  gem 'git'
+  gem 'rack-test'
   gem 'minitest'
   gem 'gmail'
 end
