@@ -26,5 +26,9 @@ class GitRepository
     @git.commit('bad commit')
     @git.gcommit('HEAD').sha
   end
+
+  def url
+    @path
+  end
 end
 

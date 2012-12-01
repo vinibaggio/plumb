@@ -10,15 +10,9 @@ require_relative '../support/git_repository'
 require 'debugger'
 
 describe "CI end-end" do
-  def support_path
-    Pathname.new(File.expand_path('../../support/', __FILE__))
-  end
-
   let(:application) { ApplicationRunner.new }
-  let(:repository_url) { support_path.join('example_git_repo') }
-  let(:repository) {
-    GitRepository.new(author: mail_config['email'])
-  }
+  let(:support_path) { Pathname.new(File.expand_path('../../support/', __FILE__)) }
+  let(:repository) { GitRepository.new(author: mail_config['email']) }
   let(:mail_config) { YAML.load_file(support_path.join('gmail_config.yml')) }
   let(:mail_client) { GMailClient.new(mail_config) }
 
@@ -33,12 +27,13 @@ describe "CI end-end" do
 
     application.start
     application.add_pipeline(pipeline_name)
+    application.add_pipeline_author_emails(pipeline_name)
 
     repository.create
     application.add_job('unit-tests',
                         pipeline: pipeline_name,
                         script: 'rake',
-                        repository: repository_url)
+                        repository_url: repository.url)
     mail_client.connect
     bad_commit_id = repository.create_bad_commit
     application.run_pipeline(pipeline_name)

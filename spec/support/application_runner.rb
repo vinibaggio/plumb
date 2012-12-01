@@ -1,31 +1,44 @@
-require 'rack/test'
-require_relative '../../lib/plumb/server'
+require 'fileutils'
 
 class ApplicationRunner
-  include Rack::Test::Methods
+  attr_reader :working_path, :plumb_path
+
+  def initialize
+    @plumb_path = File.expand_path('../../../bin/plumb', __FILE__)
+  end
 
   def start
-    @app = Plumb::Server.new
+    @working_path = Pathname.new(Dir.mktmpdir)
   end
 
   def stop
+    FileUtils.remove_entry_secure(working_path)
   end
 
   def add_job(name, options)
-    post "/jobs", {name: name}.merge(options)
+    pipeline = options.fetch :pipeline
+    repo = options.fetch :repository_url
+    script = options.fetch :script
+    plumb "job create #{name} #{repo}"
+    plumb "job #{name} script create script_1 '#{script}'"
+    plumb "pipeline #{pipeline} append_job #{name}"
   end
 
   def add_pipeline(name)
-    post "/pipelines", name: name
+    plumb "pipeline create #{name}"
   end
 
-  def run_pipeline(*)
-    post "/pipelines/runs"
+  def run_pipeline(name)
+    plumb "pipeline run #{name}"
+  end
+
+  def add_pipeline_author_emails(name)
+    plumb "pipeline #{name} author_email create"
   end
 
   private
 
-  def app
-    @app
+  def plumb(command)
+    system "cd #{working_path} && #{plumb_path} #{command}" or raise "command failed"
   end
 end
