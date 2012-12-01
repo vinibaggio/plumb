@@ -15,6 +15,14 @@ class ApplicationRunner
     FileUtils.remove_entry_secure(working_path)
   end
 
+  def add_pipeline(name)
+    plumb "pipeline create #{name}"
+  end
+
+  def add_pipeline_author_emails(name)
+    plumb "pipeline #{name} author_email create"
+  end
+
   def add_job(name, options)
     pipeline = options.fetch :pipeline
     repo = options.fetch :repository_url
@@ -24,16 +32,8 @@ class ApplicationRunner
     plumb "pipeline #{pipeline} append_job #{name}"
   end
 
-  def add_pipeline(name)
-    plumb "pipeline create #{name}"
-  end
-
   def run_pipeline(name)
     plumb "pipeline run #{name}"
-  end
-
-  def add_pipeline_author_emails(name)
-    plumb "pipeline #{name} author_email create"
   end
 
   private

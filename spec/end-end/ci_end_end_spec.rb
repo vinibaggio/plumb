@@ -1,6 +1,5 @@
 gem 'minitest'
 require 'minitest/spec'
-require 'minitest/autorun'
 require 'yaml'
 require 'pathname'
 require_relative '../support/application_runner'

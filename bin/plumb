@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/plumb/ui/cli_translator'
+
+class Main
+  def call
+    Plumb::UI::CliTranslator.new(self).
+      process_command(ARGV)
+  end
+
+  def pipeline_creation_requested(name)
+    Plumber.new.create_pipeline(name)
+  end
+
+  def unknown_command(name)
+
+  end
+end
+Main.new.call
