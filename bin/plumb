@@ -1,19 +1,41 @@
 #!/usr/bin/env ruby
 
 require_relative '../lib/plumb/ui/cli_translator'
+require_relative '../lib/plumb/domain/pipeline'
 
 class Main
+  VERBS_TO_NOUNS = {
+    'create' => 'creation',
+    'append' => 'append'
+  }
+
   def call
-    Plumb::UI::CliTranslator.new(self).
-      process_command(ARGV)
+    Plumb::UI::CliTranslator.new(self, VERBS_TO_NOUNS).process_command(ARGV)
+  end
+
+  def pipeline_author_email_notification_creation_requested(pipeline_name)
+
+  end
+
+  def job_creation_requested(name)
+
+  end
+
+  def job_script_creation_requested(job_name, script_name, script)
+
   end
 
   def pipeline_creation_requested(name)
-    Plumber.new.create_pipeline(name)
+    Plumb::Domain::Pipeline.new(name)
+  end
+
+  def pipeline_job_append_requested(pipeline_name, job_name)
+
   end
 
   def unknown_command(name)
-
+    $stderr.puts "unknown command: #{name}"
+    exit 1
   end
 end
 Main.new.call

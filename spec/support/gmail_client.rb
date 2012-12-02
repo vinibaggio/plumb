@@ -25,7 +25,7 @@ class GMailClient
   end
 
   def logout
-    @gmail.logout
+    @gmail.logout if @gmail
   end
 
   private

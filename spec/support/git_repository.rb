@@ -14,7 +14,7 @@ class GitRepository
   end
 
   def destroy
-    FileUtils.remove_entry_secure(@path)
+    FileUtils.remove_entry_secure(@path) if @path
   end
 
   def create_bad_commit

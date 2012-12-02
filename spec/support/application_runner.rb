@@ -20,7 +20,7 @@ class ApplicationRunner
   end
 
   def add_pipeline_author_emails(name)
-    plumb "pipeline #{name} author_email create"
+    plumb "pipeline #{name} author_email_notification create"
   end
 
   def add_job(name, options)
@@ -29,7 +29,7 @@ class ApplicationRunner
     script = options.fetch :script
     plumb "job create #{name} #{repo}"
     plumb "job #{name} script create script_1 '#{script}'"
-    plumb "pipeline #{pipeline} append_job #{name}"
+    plumb "pipeline #{pipeline} job append #{name}"
   end
 
   def run_pipeline(name)

@@ -1,12 +1,9 @@
-gem 'minitest'
-require 'minitest/spec'
+require_relative '../spec_helper'
 require 'yaml'
 require 'pathname'
 require_relative '../support/application_runner'
 require_relative '../support/gmail_client'
 require_relative '../support/git_repository'
-
-require 'debugger'
 
 describe "CI end-end" do
   let(:application) { ApplicationRunner.new }
