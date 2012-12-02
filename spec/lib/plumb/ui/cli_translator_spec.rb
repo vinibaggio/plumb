@@ -34,6 +34,14 @@ module Plumb
         translator.process_command(command)
       end
 
+      it "notifies about top-level entity creation with an argument" do
+        command = %w(job create unit_tests git@github.com:camelpunch/somerepo)
+        translator = CliTranslator.new(listener, 'create' => 'creation')
+        listener.expect(:job_creation_requested, nil,
+                        ['unit_tests', 'git@github.com:camelpunch/somerepo'])
+        translator.process_command(command)
+      end
+
       it "notifies about setting up a service on an existing entity" do
         command = %w(pipeline myapp-deployment author_email_notification create)
         translator = CliTranslator.new(listener, 'create' => 'creation')

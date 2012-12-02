@@ -2,40 +2,66 @@
 
 require_relative '../lib/plumb/ui/cli_translator'
 require_relative '../lib/plumb/domain/pipeline'
+require_relative '../lib/plumb/domain/job'
+require_relative '../lib/plumb/domain/jobs'
+require_relative '../lib/plumb/domain/script'
+require_relative '../lib/plumb/domain/git_repository'
+require_relative '../lib/plumb/domain/runner'
 
-class Main
-  VERBS_TO_NOUNS = {
-    'create' => 'creation',
-    'append' => 'append'
-  }
+module Plumb
+  class Main
+    VERBS_TO_NOUNS = {
+      'create' => 'creation',
+      'run' => 'run',
+      'append' => 'append'
+    }
 
-  def call
-    Plumb::UI::CliTranslator.new(self, VERBS_TO_NOUNS).process_command(ARGV)
-  end
+    def call
+      @jobs = Domain::Jobs.new(self)
+      UI::CliTranslator.new(self, VERBS_TO_NOUNS).process_command(ARGV)
+    end
 
-  def pipeline_author_email_notification_creation_requested(pipeline_name)
+    # task: get email address from repo to infrastructure layer
 
-  end
+    def pipeline_creation_requested(name)
+      # doesn't matter yet - we always have a pipeline job append
+    end
 
-  def job_creation_requested(name)
+    def pipeline_job_append_requested(pipeline_name, job_name)
+      @pipeline = Domain::Pipeline.new(
+        pipeline_name, order: [ [job_name] ]
+      )
+    end
 
-  end
+    def pipeline_run_requested(name)
+      Domain::Runner.new(@pipeline).run
+    end
 
-  def job_script_creation_requested(job_name, script_name, script)
+    def pipeline_author_email_notification_creation_requested(pipeline_name)
+      # don't care since there's only one case: true
+    end
 
-  end
+    def job_creation_requested(name, repo)
+      @jobs << Domain::Job.new(name: name,
+                               repository: Domain::GitRepository.new(repo))
+    end
 
-  def pipeline_creation_requested(name)
-    Plumb::Domain::Pipeline.new(name)
-  end
+    def job_created(job)
 
-  def pipeline_job_append_requested(pipeline_name, job_name)
+    end
 
-  end
+    def job_script_creation_requested(job_name, script_name, script_source)
+      @jobs.update(job_name, script: Domain::Script.new(script_name, script_source))
+    end
 
-  def unknown_command(name)
-    $stderr.puts "unknown command: #{name}"
-    exit 1
+    def job_not_found(name)
+      $stderr.puts "couldn't find job #{name}"
+    end
+
+    def unknown_command(name)
+      $stderr.puts "unknown command: #{name}"
+      exit 1
+    end
   end
 end
-Main.new.call
+Plumb::Main.new.call

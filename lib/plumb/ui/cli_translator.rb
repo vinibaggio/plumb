@@ -14,7 +14,7 @@ module Plumb
         def to_a
           return [:unknown_command, args.join(' ')] if invalid?
           [name(entity, verb)] +
-            [first_arg, complex_arg(4), complex_arg(5)].compact
+            [first_arg, second_arg, complex_arg(5)].compact
         end
 
         def invalid?
@@ -23,6 +23,10 @@ module Plumb
 
         def first_arg
           simple_command? ? args[2] : args[1]
+        end
+
+        def second_arg
+          simple_command? ? args[3] : args[4]
         end
 
         def complex_arg(idx)
