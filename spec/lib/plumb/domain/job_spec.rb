@@ -1,4 +1,4 @@
-require_relative '../../../spec_helper'
+require 'minitest/autorun'
 require_relative '../../../../lib/plumb/domain/job'
 
 module Plumb

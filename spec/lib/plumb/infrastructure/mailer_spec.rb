@@ -1,4 +1,4 @@
-require_relative '../../../spec_helper'
+require 'minitest/autorun'
 require_relative '../../../support/gmail_client'
 require_relative '../../../../lib/plumb/infrastructure/mailer'
 require_relative '../../../../lib/plumb/domain/pipeline'

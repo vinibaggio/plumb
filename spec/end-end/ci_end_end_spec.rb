@@ -1,4 +1,4 @@
-require_relative '../spec_helper'
+require 'minitest/autorun'
 require 'yaml'
 require 'pathname'
 require_relative '../support/application_runner'
@@ -23,7 +23,9 @@ describe "CI end-end" do
 
     application.start
     application.add_pipeline(pipeline_name)
-    application.add_pipeline_notification_emails(pipeline_name, mail_config['email'])
+    application.add_pipeline_notification_emails(
+      pipeline_name, mail_config['email']
+    )
 
     repository.create
     application.add_job('unit-tests',
@@ -33,6 +35,8 @@ describe "CI end-end" do
     mail_client.connect
     bad_commit_id = repository.create_bad_commit
     application.run_pipeline(pipeline_name)
-    mail_client.receives_failure_notification_about_commit_ids([bad_commit_id])
+    mail_client.receives_failure_notification_about_commit_ids(
+      [bad_commit_id]
+    )
   end
 end

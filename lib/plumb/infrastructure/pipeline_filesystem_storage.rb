@@ -11,6 +11,7 @@ module Plumb
       end
 
       def <<(pipeline)
+        raise ArgumentError, "pipeline name is nil!" if pipeline.nil?
         make_directory(pipeline)
         store_order(pipeline)
       end

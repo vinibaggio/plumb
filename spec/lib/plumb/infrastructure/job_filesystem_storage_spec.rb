@@ -1,5 +1,5 @@
 require 'tmpdir'
-require_relative '../../../spec_helper'
+require 'minitest/autorun'
 require_relative '../../../../lib/plumb/domain/job'
 require_relative '../../../../lib/plumb/domain/script'
 require_relative '../../../../lib/plumb/infrastructure/job_filesystem_storage'

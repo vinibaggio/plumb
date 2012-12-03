@@ -1,5 +1,5 @@
+require 'minitest/autorun'
 require 'tmpdir'
-require_relative '../../../spec_helper'
 require_relative '../../../../lib/plumb/domain/pipeline'
 require_relative '../../../../lib/plumb/infrastructure/pipeline_filesystem_storage'
 
@@ -10,6 +10,11 @@ module Plumb
 
       after do
         FileUtils.remove_entry_secure(dir)
+      end
+
+      it "raises if attempt is made to make pipeline with nil name" do
+        storage = PipelineFileSystemStorage.new(dir)
+        ->{storage << nil}.must_raise ArgumentError
       end
 
       it "can store and retrieve" do
