@@ -18,12 +18,12 @@ describe "CI end-end" do
     repository.destroy
   end
 
-  it "emails developers about their failed commits" do
+  it "sends an email to a configured address when a build fails" do
     pipeline_name = 'myapp-deployment'
 
     application.start
     application.add_pipeline(pipeline_name)
-    application.add_pipeline_author_emails(pipeline_name)
+    application.add_pipeline_notification_emails(pipeline_name, mail_config['email'])
 
     repository.create
     application.add_job('unit-tests',
@@ -33,6 +33,6 @@ describe "CI end-end" do
     mail_client.connect
     bad_commit_id = repository.create_bad_commit
     application.run_pipeline(pipeline_name)
-    mail_client.receives_failure_notification_about_commit_id(bad_commit_id)
+    mail_client.receives_failure_notification_about_commit_ids([bad_commit_id])
   end
 end

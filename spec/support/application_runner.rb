@@ -19,8 +19,8 @@ class ApplicationRunner
     plumb "pipeline create #{name}"
   end
 
-  def add_pipeline_author_emails(name)
-    plumb "pipeline #{name} author_email_notification create"
+  def add_pipeline_notification_emails(name, email)
+    plumb "pipeline #{name} email_notification create #{email}"
   end
 
   def add_job(name, options)

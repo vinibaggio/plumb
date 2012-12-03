@@ -1,12 +1,18 @@
 #!/usr/bin/env ruby
 
 require_relative '../lib/plumb/ui/cli_translator'
+require_relative '../lib/plumb/domain/build'
 require_relative '../lib/plumb/domain/pipeline'
+require_relative '../lib/plumb/domain/pipelines'
+require_relative '../lib/plumb/domain/pipeline_runner'
 require_relative '../lib/plumb/domain/job'
 require_relative '../lib/plumb/domain/jobs'
 require_relative '../lib/plumb/domain/script'
 require_relative '../lib/plumb/domain/git_repository'
-require_relative '../lib/plumb/domain/runner'
+require_relative '../lib/plumb/domain/build_runner'
+require_relative '../lib/plumb/infrastructure/job_filesystem_storage'
+require_relative '../lib/plumb/infrastructure/pipeline_filesystem_storage'
+require_relative '../lib/plumb/infrastructure/mailer'
 
 module Plumb
   class Main
@@ -17,7 +23,10 @@ module Plumb
     }
 
     def call
-      @jobs = Domain::Jobs.new(self)
+      @job_storage = Infrastructure::JobFileSystemStorage.new(Dir.pwd)
+      @jobs = Domain::Jobs.new(self, @job_storage)
+      @pipeline_storage = Infrastructure::PipelineFileSystemStorage.new(Dir.pwd)
+      @pipelines = Domain::Pipelines.new(self, @pipeline_storage)
       UI::CliTranslator.new(self, VERBS_TO_NOUNS).process_command(ARGV)
     end
 
@@ -28,17 +37,31 @@ module Plumb
     end
 
     def pipeline_job_append_requested(pipeline_name, job_name)
-      @pipeline = Domain::Pipeline.new(
-        pipeline_name, order: [ [job_name] ]
+      @pipelines << Domain::Pipeline.new(
+        name: pipeline_name, order: [ [job_name] ]
       )
     end
 
+
     def pipeline_run_requested(name)
-      Domain::Runner.new(@pipeline).run
+      build_runner = Domain::BuildRunner.new
+      build_runner.listener = Infrastructure::Mailer.new
+
+      # we can avoid this awkwardness if the repositories take a delegate at
+      # fetch time
+      pipeline_runner = Domain::PipelineRunner.new(name, build_runner)
+      pipeline_runner.pipeline_fetcher = Domain::Pipelines.new(pipeline_runner, @pipeline_storage)
+      pipeline_runner.job_fetcher = Domain::Jobs.new(pipeline_runner, @job_storage)
+
+      pipeline_runner.run
     end
 
-    def pipeline_author_email_notification_creation_requested(pipeline_name)
-      # don't care since there's only one case: true
+
+    def pipeline_email_notification_creation_requested(pipeline_name, email)
+      @pipelines.update(pipeline_name, notification_email: email)
+    end
+
+    def pipeline_created(pipeline)
     end
 
     def job_creation_requested(name, repo)
@@ -47,7 +70,6 @@ module Plumb
     end
 
     def job_created(job)
-
     end
 
     def job_script_creation_requested(job_name, script_name, script_source)
@@ -56,6 +78,7 @@ module Plumb
 
     def job_not_found(name)
       $stderr.puts "couldn't find job #{name}"
+      exit 1
     end
 
     def unknown_command(name)

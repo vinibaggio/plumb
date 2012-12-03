@@ -1,11 +1,9 @@
-require 'set'
-
 module Plumb
   module Domain
     class Jobs
-      def initialize(listener)
+      def initialize(listener, storage)
         @listener = listener
-        @jobs = Set.new
+        @jobs = storage
       end
 
       def <<(job)
@@ -21,8 +19,8 @@ module Plumb
 
       def update(name, attributes)
         find_job(name) do |job|
-          self << Job.new(job.attributes.merge(attributes))
           @jobs.delete(job)
+          self << Job.new(job.attributes.merge(attributes))
         end
       end
 

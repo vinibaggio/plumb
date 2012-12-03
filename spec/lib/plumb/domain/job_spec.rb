@@ -5,8 +5,8 @@ module Plumb
   module Domain
     describe Job do
       it "can return its attributes" do
-        job_attributes = {name: 'deploy', script: 'rake deploy'}
-        Job.new(job_attributes).attributes.must_equal(job_attributes)
+        attributes = {name: 'deploy', script: 'rake deploy'}
+        Job.new(attributes).attributes.must_equal(attributes)
       end
     end
   end
