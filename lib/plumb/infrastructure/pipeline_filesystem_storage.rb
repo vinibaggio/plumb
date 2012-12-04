@@ -10,25 +10,29 @@ module Plumb
         @path = Pathname.new(dir)
       end
 
-      def <<(pipeline)
-        raise ArgumentError, "pipeline name is nil!" if pipeline.nil?
+      def []=(name, pipeline)
+        raise ArgumentError, "storage key is nil!" if name.nil?
         make_directory(pipeline)
         store_order(pipeline)
       end
 
-      def find(ifnone = nil, &block)
+      def [](search_name)
         each_name do |name|
-          pipeline = Domain::Pipeline.new(
-            name: name,
-            order: JSON.parse(File.read(order_file_path(name)))
-          )
-          return pipeline if yield pipeline
+          if name == search_name
+            return Domain::Pipeline.new(
+              name: name,
+              order: get_order(name)
+            )
+          end
         end
-        ifnone.call if ifnone
       end
 
-      def delete(pipeline)
-        FileUtils.remove_entry_secure pipeline_path(pipeline.name)
+      def fetch(search_name, &block)
+        self[search_name] || block.call
+      end
+
+      def delete(name)
+        FileUtils.remove_entry_secure pipeline_path(name)
       end
 
       private
@@ -44,6 +48,14 @@ module Plumb
         end
       end
 
+      def get_order(name)
+        if File.exists?(order_file_path(name)) then
+          JSON.parse(File.read(order_file_path(name)))
+        else
+          []
+        end
+      end
+
       def order_file_path(pipeline_name)
         pipeline_path(pipeline_name).join('order.json')
       end
@@ -52,6 +64,7 @@ module Plumb
         Dir["#{pipelines_path}/*"].each do |name|
           yield File.basename(name)
         end
+        nil
       end
 
       def pipelines_path

@@ -6,6 +6,12 @@ require_relative '../../../../lib/plumb/domain/jobs'
 module Plumb
   module Domain
     describe Jobs do
+      class MiniTest::Mock
+        def allows(method_name)
+          self.define_method(method_name) do end
+        end
+      end
+
       describe "fetching a non-existent job" do
         it "sends appropriate not found message to its listener" do
           listener = MiniTest::Mock.new
@@ -40,9 +46,10 @@ module Plumb
       it "can fetch a job after an update" do
         listener = MiniTest::Mock.new
         def listener.job_created(*); end
-        repo = Jobs.new(listener, [])
 
+        repo = Jobs.new(listener, [])
         repo << Job.new(name: 'Futz')
+
         script = Domain::Script.new('some-script', 'rake')
         repo.update('Futz', script: script)
 
@@ -61,7 +68,6 @@ module Plumb
         repo = Jobs.new(listener, [])
 
         repo << Job.new(name: 'Futz', foo: 'bar')
-        script = Domain::Script.new('some-script', 'rake')
         repo.update('Futz', foo: 'bar')
 
         listener.expect(

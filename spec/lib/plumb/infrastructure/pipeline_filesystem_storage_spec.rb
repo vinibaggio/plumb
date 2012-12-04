@@ -14,7 +14,7 @@ module Plumb
 
       it "raises if attempt is made to make pipeline with nil name" do
         storage = PipelineFileSystemStorage.new(dir)
-        ->{storage << nil}.must_raise ArgumentError
+        ->{storage[nil] = Domain::Pipeline.new(name: nil)}.must_raise ArgumentError
       end
 
       it "can store and retrieve" do
@@ -25,38 +25,46 @@ module Plumb
             ['lovely-job']
           ]
         )
-        storage1 << stored_pipeline
+        storage1['foo'] = stored_pipeline
 
         storage2 = PipelineFileSystemStorage.new(dir)
-        found_pipeline = storage2.find {|pipeline| pipeline.name == 'foo'}
+        found_pipeline = storage2['foo']
         found_pipeline.must_equal stored_pipeline
       end
 
       describe "finding a pipeline not stored" do
         it "returns nil" do
           storage = PipelineFileSystemStorage.new(dir)
-          storage.find {|pipeline| pipeline.name == 'foo'}.must_be_nil
+          storage['foo'].must_be_nil
         end
 
-        it "calls the callback" do
-          callable = MiniTest::Mock.new
+        it "returns the default value" do
           storage = PipelineFileSystemStorage.new(dir)
-          callable.expect(:call, 'foo', [])
-          storage.find(callable) {|pipeline| pipeline.name == 'foo'}.
-            must_equal('foo')
-          callable.verify
+          storage.fetch('foo') { 'bar' }.must_equal('bar')
+        end
+      end
+
+      describe "finding a pipeline without an order of jobs" do
+        it "returns the pipeline" do
+          storage1 = PipelineFileSystemStorage.new(dir)
+          stored_pipeline = Domain::Pipeline.new(name: 'foo')
+          storage1['foo'] = stored_pipeline
+
+          storage2 = PipelineFileSystemStorage.new(dir)
+          found_pipeline = storage2['foo']
+          found_pipeline.must_equal stored_pipeline
         end
       end
 
       it "can delete pipelines" do
         storage1 = PipelineFileSystemStorage.new(dir)
         stored_pipeline = Domain::Pipeline.new(name: 'foo')
-        storage1 << stored_pipeline
+        storage1['foo'] = stored_pipeline
 
         storage2 = PipelineFileSystemStorage.new(dir)
-        storage2.delete(stored_pipeline)
+        storage2.delete('foo')
 
-        storage1.find {|pipeline| pipeline.name == 'foo'}.must_be_nil
+        storage1['foo'].must_be_nil
       end
     end
   end
