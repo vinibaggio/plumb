@@ -22,6 +22,23 @@ module Plumb
       end
 
       describe "build failure" do
+        it "raises if the build has no notification address" do
+          pipeline = Domain::Pipeline.new(
+            name: 'test-all',
+            notification_email: nil
+          )
+
+          ->{
+            Mailer.new(mail_config_production, aws_config).build_failed(
+              Domain::BuildFailure.new(
+                Domain::Build.new(pipeline: pipeline,
+                                  job: Domain::Job.new,
+                                  commits: ['1234', 'asdf'])
+              )
+            )
+          }.must_raise Mailer::NoRecipients
+        end
+
         it "sends an email to the configured address" do
           email = mail_config_test['email']
           pipeline = Domain::Pipeline.new(
@@ -32,7 +49,8 @@ module Plumb
           mail_client.connect
           Mailer.new(mail_config_production, aws_config).build_failed(
             Domain::BuildFailure.new(
-              Domain::Build.new(pipeline, Domain::Job.new,
+              Domain::Build.new(pipeline: pipeline,
+                                job: Domain::Job.new,
                                 commits: ['1234', 'asdf'])
             )
           )

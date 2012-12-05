@@ -9,21 +9,25 @@ module Plumb
         @path = Pathname.new(dir)
       end
 
-      def <<(job)
-        make_directory(job)
-        store_script(job)
+      def []=(name, job)
+        make_directory(name)
+        store_script(name, job.script)
       end
 
-      def find(ifnone = nil, &block)
+      def [](search_name)
         each_stored_attributes do |attributes|
-          job = Domain::Job.new(attributes)
-          return job if yield job
+          if attributes[:name] == search_name
+            return Domain::Job.new(attributes)
+          end
         end
-        ifnone.call if ifnone
       end
 
-      def delete(job)
-        FileUtils.remove_entry_secure job_path(job.name)
+      def fetch(search_name, &block)
+        self[search_name] || block.call
+      end
+
+      def delete(name)
+        FileUtils.remove_entry_secure job_path(name)
       end
 
       private
@@ -34,6 +38,7 @@ module Plumb
           attributes = {name: name}
           yield script ? attributes.merge(script: script) : attributes
         end
+        nil
       end
 
       def script_from_name(name)
@@ -42,14 +47,14 @@ module Plumb
                            File.read(first_script_path(name)))
       end
 
-      def make_directory(job)
-        FileUtils.mkdir_p scripts_path(job.name)
+      def make_directory(name)
+        FileUtils.mkdir_p scripts_path(name)
       end
 
-      def store_script(job)
-        return nil unless job.script
-        File.open(scripts_path(job.name).join(job.script.name), 'w+') do |file|
-          file << job.script.source
+      def store_script(name, script)
+        return nil unless script
+        File.open(scripts_path(name).join(script.name), 'w+') do |file|
+          file << script.source
         end
       end
 

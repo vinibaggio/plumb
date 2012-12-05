@@ -18,7 +18,9 @@ module Plumb
       end
 
       def job_found(job)
-        @build_runner.run_build(Build.new(@pipeline, job))
+        @build_runner.run_build(
+          Build.new(pipeline: @pipeline, job: job)
+        )
       end
     end
   end

@@ -19,48 +19,44 @@ module Plumb
           name: 'foo',
           script: Domain::Script.new('run_rake', 'rake')
         )
-        storage1 << stored_job
+        storage1['foo'] = stored_job
 
         storage2 = JobFileSystemStorage.new(dir)
-        found_job = storage2.find {|job| job.name == 'foo'}
+        found_job = storage2['foo']
         found_job.must_equal stored_job
       end
 
       it "can store and retrieve jobs without scripts" do
         storage1 = JobFileSystemStorage.new(dir)
         stored_job = Domain::Job.new(name: 'foo')
-        storage1 << stored_job
+        storage1['foo'] = stored_job
 
         storage2 = JobFileSystemStorage.new(dir)
-        found_job = storage2.find {|job| job.name == 'foo'}
+        found_job = storage2['foo']
         found_job.must_equal stored_job
       end
 
       describe "finding a job not stored" do
         it "returns nil" do
           storage = JobFileSystemStorage.new(dir)
-          storage.find {|job| job.name == 'foo'}.must_be_nil
+          storage['foo'].must_be_nil
         end
 
-        it "calls the callback" do
-          callable = MiniTest::Mock.new
+        it "returns the default value" do
           storage = JobFileSystemStorage.new(dir)
-          callable.expect(:call, 'foo', [])
-          storage.find(callable) {|job| job.name == 'foo'}.
-            must_equal('foo')
-          callable.verify
+          storage.fetch('foo') { 'bar' }.must_equal('bar')
         end
       end
 
       it "can delete jobs" do
         storage1 = JobFileSystemStorage.new(dir)
         stored_job = Domain::Job.new(name: 'foo')
-        storage1 << stored_job
+        storage1['foo'] = stored_job
 
         storage2 = JobFileSystemStorage.new(dir)
-        storage2.delete(stored_job)
+        storage2.delete('foo')
 
-        storage1.find {|job| job.name == 'foo'}.must_be_nil
+        storage1['foo'].must_be_nil
       end
     end
   end

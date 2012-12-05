@@ -14,14 +14,15 @@ module Plumb
         raise ArgumentError, "storage key is nil!" if name.nil?
         make_directory(pipeline)
         store_order(pipeline)
+        store_attributes(pipeline)
       end
 
       def [](search_name)
         each_name do |name|
           if name == search_name
             return Domain::Pipeline.new(
-              name: name,
-              order: get_order(name)
+              { name: name, order: get_order(name) }.
+              merge(get_attributes(name))
             )
           end
         end
@@ -48,6 +49,14 @@ module Plumb
         end
       end
 
+      def store_attributes(pipeline)
+        File.open(attributes_file_path(pipeline.name), 'w+') do |file|
+          file << JSON.generate(pipeline.attributes.reject {|key, value|
+            [:name, :order].include?(key)
+          })
+        end
+      end
+
       def get_order(name)
         if File.exists?(order_file_path(name)) then
           JSON.parse(File.read(order_file_path(name)))
@@ -56,8 +65,20 @@ module Plumb
         end
       end
 
+      def get_attributes(name)
+        if File.exists?(attributes_file_path(name)) then
+          JSON.parse(File.read(attributes_file_path(name)))
+        else
+          {}
+        end
+      end
+
       def order_file_path(pipeline_name)
         pipeline_path(pipeline_name).join('order.json')
+      end
+
+      def attributes_file_path(pipeline_name)
+        pipeline_path(pipeline_name).join('attributes.json')
       end
 
       def each_name

@@ -21,15 +21,32 @@ module Plumb
         storage1 = PipelineFileSystemStorage.new(dir)
         stored_pipeline = Domain::Pipeline.new(
           name: 'foo',
-          order: [
-            ['lovely-job']
-          ]
+          order: [ ['lovely-job'] ]
         )
         storage1['foo'] = stored_pipeline
 
         storage2 = PipelineFileSystemStorage.new(dir)
         found_pipeline = storage2['foo']
         found_pipeline.must_equal stored_pipeline
+      end
+
+      it "can overwrite attributes after initial storage" do
+        storage1 = PipelineFileSystemStorage.new(dir)
+        stored_pipeline = Domain::Pipeline.new(
+          name: 'foo',
+          order: [ ['lovely-job'] ]
+        )
+        storage1['foo'] = stored_pipeline
+
+        storage2 = PipelineFileSystemStorage.new(dir)
+        stored_pipeline = Domain::Pipeline.new(
+          name: 'foo',
+          order: [ ['lovely-job'] ],
+          notification_email: 'some@address.co'
+        )
+        storage2['foo'] = stored_pipeline
+        found_pipeline = storage2['foo']
+        found_pipeline.notification_email.must_equal 'some@address.co'
       end
 
       describe "finding a pipeline not stored" do

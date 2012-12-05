@@ -45,8 +45,10 @@ module Plumb
         job = Job.new(name: 'myjob', script: Script.new('tests', 'rake'))
 
         pipeline_runner.pipeline_found(pipeline)
-
-        build_runner.expect(:run_build, nil, [Build.new(pipeline, job)])
+        build_runner.expect(
+          :run_build, nil,
+          [Build.new(pipeline: pipeline, job: job)]
+        )
         pipeline_runner.job_found(job)
         build_runner.verify
       end

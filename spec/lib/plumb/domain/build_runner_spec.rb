@@ -13,7 +13,7 @@ module Plumb
         listener = MiniTest::Mock.new
         runner.listener = listener
 
-        build = Build.new(unused_pipeline, unused_job)
+        build = Build.new
         failure = BuildFailure.new(build)
         listener.expect(:build_failed, nil, [failure])
         runner.run_build(build)

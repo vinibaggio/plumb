@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 
+require 'yaml'
 require_relative '../lib/plumb/ui/cli_translator'
 require_relative '../lib/plumb/domain/build'
 require_relative '../lib/plumb/domain/pipeline'
 require_relative '../lib/plumb/domain/container'
 require_relative '../lib/plumb/domain/pipeline_runner'
 require_relative '../lib/plumb/domain/job'
-require_relative '../lib/plumb/domain/jobs'
 require_relative '../lib/plumb/domain/script'
 require_relative '../lib/plumb/domain/git_repository'
 require_relative '../lib/plumb/domain/build_runner'
@@ -45,7 +45,11 @@ module Plumb
 
     def pipeline_run_requested(name)
       build_runner = Domain::BuildRunner.new
-      build_runner.listener = Infrastructure::Mailer.new
+      config_path = Pathname.new(File.expand_path('../../config', __FILE__))
+      build_runner.listener = Infrastructure::Mailer.new(
+        YAML.load_file(config_path.join('mail.yml')),
+        YAML.load_file(config_path.join('aws.yml'))
+      )
 
       # we can avoid this awkwardness if the repositories take a delegate at
       # fetch time
@@ -65,8 +69,7 @@ module Plumb
     end
 
     def job_creation_requested(name, repo)
-      @jobs << Domain::Container.new(
-        Domain::Job,
+      @jobs << Domain::Job.new(
         name: name,
         repository: Domain::GitRepository.new(repo)
       )
