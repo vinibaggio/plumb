@@ -13,20 +13,20 @@ module Plumb
       end
 
       def fetch(name)
-        find_pipeline(name) do |pipeline|
+        find_entity(name) do |pipeline|
           @listener.__send__("#{human_type}_found", pipeline)
         end
       end
 
       def update(name, attributes)
-        find_pipeline(name) do |pipeline|
+        find_entity(name) do |pipeline|
           self << @klass.new(pipeline.attributes.merge(attributes))
         end
       end
 
       private
 
-      def find_pipeline(name)
+      def find_entity(name)
         found(name).tap do |pipeline|
           yield pipeline if pipeline
         end
