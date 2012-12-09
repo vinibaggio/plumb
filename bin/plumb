@@ -30,12 +30,8 @@ module Plumb
       UI::CliTranslator.new(self, VERBS_TO_NOUNS).process_command(ARGV)
     end
 
-    # task: get email address from repo to infrastructure layer
-
     def pipeline_creation_requested(name)
-      @pipelines << Domain::Pipeline.new(
-        name: name
-      )
+      @pipelines << Domain::Pipeline.new(name: name)
     end
 
     def pipeline_job_append_requested(pipeline_name, job_name)
@@ -53,9 +49,17 @@ module Plumb
 
       # we can avoid this awkwardness if the repositories take a delegate at
       # fetch time
-      pipeline_runner = Domain::PipelineRunner.new(name, build_runner)
-      pipeline_runner.pipeline_fetcher = Domain::Container.new(Domain::Pipeline, pipeline_runner, @pipeline_storage)
-      pipeline_runner.job_fetcher = Domain::Container.new(Domain::Job, pipeline_runner, @job_storage)
+
+      #repo_fetcher = Infrastructure::GitFetcher.new
+      pipeline_runner =
+        Domain::PipelineRunner.new(name, build_runner)
+      #, repo_fetcher)
+
+      pipeline_runner.pipeline_fetcher =
+        Domain::Container.new(Domain::Pipeline, pipeline_runner, @pipeline_storage)
+
+      pipeline_runner.job_fetcher =
+        Domain::Container.new(Domain::Job, pipeline_runner, @job_storage)
 
       pipeline_runner.run
     end
@@ -68,10 +72,10 @@ module Plumb
     def pipeline_created(pipeline)
     end
 
-    def job_creation_requested(name, repo)
+    def job_creation_requested(name, repo_url)
       @jobs << Domain::Job.new(
         name: name,
-        repository: Domain::GitRepository.new(repo)
+        repository_url: repo_url
       )
     end
 

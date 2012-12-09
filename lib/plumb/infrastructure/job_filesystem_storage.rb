@@ -1,3 +1,4 @@
+require 'json'
 require 'pathname'
 require 'fileutils'
 require_relative '../domain/job'
@@ -12,14 +13,14 @@ module Plumb
       def []=(name, job)
         make_directory(name)
         store_script(name, job.script)
+        store_repo(name, job.repository_url) if job.repository_url
       end
 
       def [](search_name)
-        each_stored_attributes do |attributes|
-          if attributes[:name] == search_name
-            return Domain::Job.new(attributes)
-          end
+        attributes_for(search_name).tap do |attributes|
+          return attributes && Domain::Job.new(attributes)
         end
+        nil
       end
 
       def fetch(search_name, &block)
@@ -32,13 +33,36 @@ module Plumb
 
       private
 
-      def each_stored_attributes
-        each_name do |name|
+      def attributes_for(search_name) 
+        attribute_sets.find {|attributes| attributes[:name] == search_name}
+      end
+
+      def attribute_sets
+        names.map {|name|
           script = script_from_name(name)
-          attributes = {name: name}
-          yield script ? attributes.merge(script: script) : attributes
-        end
-        nil
+          repository_url = repo_url_from_name(name)
+          {name: name}.tap do |attributes|
+            attributes.merge!(script: script) if script
+            attributes.merge!(repository_url: repository_url) if repository_url
+          end
+        }
+      end
+
+      def names
+        Dir["#{jobs_path}/*"].map &File.public_method(:basename)
+      end
+
+      def repo_config(name)
+        raw_file = File.read(job_path(name).join('config.json'))
+        JSON.parse(raw_file)
+      rescue JSON::ParserError => e
+        raise JSON::ParserError,
+          "#{raw_file} could not be parsed\n#{e.message}"
+      end
+
+      def repo_url_from_name(name) 
+        repo_config(name)['repository_url']
+      rescue Errno::ENOENT
       end
 
       def script_from_name(name)
@@ -58,9 +82,9 @@ module Plumb
         end
       end
 
-      def each_name
-        Dir["#{jobs_path}/*"].each do |name|
-          yield File.basename(name)
+      def store_repo(name, url)
+        File.open(job_path(name).join('config.json'), 'w+') do |file|
+          file << JSON.generate(repository_url: url)
         end
       end
 

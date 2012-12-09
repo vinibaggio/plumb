@@ -1,7 +1,9 @@
 require 'tmpdir'
 require 'minitest/autorun'
 require_relative '../../../../lib/plumb/domain/job'
+require_relative '../../../../lib/plumb/domain/commit'
 require_relative '../../../../lib/plumb/domain/script'
+require_relative '../../../../lib/plumb/domain/git_repository'
 require_relative '../../../../lib/plumb/infrastructure/job_filesystem_storage'
 
 module Plumb
@@ -34,6 +36,34 @@ module Plumb
         storage2 = JobFileSystemStorage.new(dir)
         found_job = storage2['foo']
         found_job.must_equal stored_job
+      end
+
+      it "can store and retrieve jobs with repository URLs" do
+        commit_1 = Domain::Commit.new('asdf')
+        commit_2 = Domain::Commit.new('fdsa')
+        storage1 = JobFileSystemStorage.new(dir)
+        stored_job = Domain::Job.new(
+          name: 'foo',
+          repository_url: 'git@github.com:camelpunch/some-repo.git'
+        )
+        storage1['foo'] = stored_job
+
+        storage2 = JobFileSystemStorage.new(dir)
+        found_job = storage2['foo']
+        found_job.repository_url.must_equal 'git@github.com:camelpunch/some-repo.git'
+      end
+
+      it "can store and retrieve jobs with repositories without commits" do
+        storage1 = JobFileSystemStorage.new(dir)
+        stored_job = Domain::Job.new(
+          name: 'foo',
+          repository_url: 'git@github.com:camelpunch/some-repo.git'
+        )
+        storage1['foo'] = stored_job
+
+        storage2 = JobFileSystemStorage.new(dir)
+        found_job = storage2['foo']
+        found_job.repository_url.must_equal 'git@github.com:camelpunch/some-repo.git'
       end
 
       describe "finding a job not stored" do

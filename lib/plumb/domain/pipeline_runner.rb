@@ -18,8 +18,10 @@ module Plumb
       end
 
       def job_found(job)
+        raise "No commits" if job.repository.commits.nil?
         @build_runner.run_build(
-          Build.new(pipeline: @pipeline, job: job)
+          Build.new(pipeline: @pipeline, job: job,
+                    commits: [job.repository.commits.first])
         )
       end
     end
