@@ -1,95 +1,20 @@
 #!/usr/bin/env ruby
 
-require 'yaml'
-require_relative '../lib/plumb/ui/cli_translator'
+require 'json'
 require_relative '../lib/plumb/domain/build'
 require_relative '../lib/plumb/domain/pipeline'
-require_relative '../lib/plumb/domain/container'
-require_relative '../lib/plumb/domain/pipeline_runner'
 require_relative '../lib/plumb/domain/job'
 require_relative '../lib/plumb/domain/script'
 require_relative '../lib/plumb/domain/git_repository'
-require_relative '../lib/plumb/domain/build_runner'
-require_relative '../lib/plumb/infrastructure/job_filesystem_storage'
-require_relative '../lib/plumb/infrastructure/pipeline_filesystem_storage'
+require_relative '../lib/plumb/domain/pipeline_runner'
 require_relative '../lib/plumb/infrastructure/mailer'
 
 module Plumb
   class Main
-    VERBS_TO_NOUNS = {
-      'create' => 'creation',
-      'run' => 'run',
-      'append' => 'append'
-    }
-
     def call
-      @job_storage = Infrastructure::JobFileSystemStorage.new(Dir.pwd)
-      @jobs = Domain::Container.new(Domain::Job, self, @job_storage)
-      @pipeline_storage = Infrastructure::PipelineFileSystemStorage.new(Dir.pwd)
-      @pipelines = Domain::Container.new(Domain::Pipeline, self, @pipeline_storage)
-      UI::CliTranslator.new(self, VERBS_TO_NOUNS).process_command(ARGV)
-    end
-
-    # task: get email address from repo to infrastructure layer
-
-    def pipeline_creation_requested(name)
-      @pipelines << Domain::Pipeline.new(
-        name: name
-      )
-    end
-
-    def pipeline_job_append_requested(pipeline_name, job_name)
-      @pipelines.update(pipeline_name, order: [ [job_name] ])
-    end
-
-
-    def pipeline_run_requested(name)
-      build_runner = Domain::BuildRunner.new
-      config_path = Pathname.new(File.expand_path('../../config', __FILE__))
-      build_runner.listener = Infrastructure::Mailer.new(
-        YAML.load_file(config_path.join('mail.yml')),
-        YAML.load_file(config_path.join('aws.yml'))
-      )
-
-      # we can avoid this awkwardness if the repositories take a delegate at
-      # fetch time
-      pipeline_runner = Domain::PipelineRunner.new(name, build_runner)
-      pipeline_runner.pipeline_fetcher = Domain::Container.new(Domain::Pipeline, pipeline_runner, @pipeline_storage)
-      pipeline_runner.job_fetcher = Domain::Container.new(Domain::Job, pipeline_runner, @job_storage)
-
-      pipeline_runner.run
-    end
-
-
-    def pipeline_email_notification_creation_requested(pipeline_name, email)
-      @pipelines.update(pipeline_name, notification_email: email)
-    end
-
-    def pipeline_created(pipeline)
-    end
-
-    def job_creation_requested(name, repo)
-      @jobs << Domain::Job.new(
-        name: name,
-        repository: Domain::GitRepository.new(repo)
-      )
-    end
-
-    def job_created(job)
-    end
-
-    def job_script_creation_requested(job_name, script_name, script_source)
-      @jobs.update(job_name, script: Domain::Script.new(script_name, script_source))
-    end
-
-    def job_not_found(name)
-      $stderr.puts "couldn't find job #{name}"
-      exit 1
-    end
-
-    def unknown_command(name)
-      $stderr.puts "unknown command: #{name}"
-      exit 1
+      Domain::Pipeline.parse(
+        JSON.parse($stdin.read)
+      ).run
     end
   end
 end

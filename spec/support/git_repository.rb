@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'pathname'
-require 'git'
 
 class GitRepository
   def initialize(options)
@@ -9,8 +8,7 @@ class GitRepository
 
   def create
     @path = Pathname.new(Dir.mktmpdir)
-    @git = Git.init(@path.to_s)
-    @git.config('user.email', @email)
+    exec "git init"
   end
 
   def destroy
@@ -18,17 +16,20 @@ class GitRepository
   end
 
   def create_bad_commit
-    File.open(@path.join('Rakefile'), 'w+') do |file|
-      file << 'bad rakefile contents'
-    end
-
-    @git.add('.')
-    @git.commit('bad commit')
-    @git.gcommit('HEAD').sha
+    exec "echo 'bad rakefile contents' > Rakefile"
+    exec "git add ."
+    exec "git commit --author='Some Author <#{@email}>' -m'Some Message'"
+    exec "git rev-parse HEAD"
   end
 
   def url
     @path
+  end
+
+  private 
+
+  def exec(cmd)
+    `cd #{@path}; #{cmd}`.strip
   end
 end
 

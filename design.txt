@@ -1,0 +1,38 @@
+Pipeline
+--------
+Enqueues everything into the waiting queue, in roughly reverse order.
+
+
+Waiting queue runner
+--------------------
+do I have siblings?
+  no: move to immediate build queue
+  yes:
+    have all of my siblings passed?
+      yes: move to immediate build queue
+      no: leave in queue
+
+
+There is one immediate build queue (per architecture), anything in it should be
+run immediately.
+
+Process single build in immediate build queue
+--------------------------------------------
+did I pass?
+  no: notify of failure
+  yes:
+    store into builds that have passed
+    did previous build for this job fail?
+      yes: notify of success
+
+
+build schema:
+  - pipeline ID
+  - job ID
+  - pipeline run ID
+  - sibling build IDs
+  - commit SHAs
+  - start time
+  - end time
+  - success boolean
+
