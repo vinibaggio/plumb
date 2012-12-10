@@ -1,15 +1,10 @@
 module Plumb
   module Domain
     class PipelineRunner
-      attr_writer :pipeline_fetcher, :job_fetcher
+      attr_writer :job_fetcher
 
-      def initialize(pipeline_name, build_runner)
-        @pipeline_name = pipeline_name
+      def initialize(build_runner)
         @build_runner = build_runner
-      end
-
-      def run
-        @pipeline_fetcher.fetch(@pipeline_name)
       end
 
       def pipeline_found(pipeline)

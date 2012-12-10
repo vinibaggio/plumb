@@ -8,22 +8,10 @@ require_relative '../../../../lib/plumb/domain/build'
 module Plumb
   module Domain
     describe PipelineRunner do
-      it "fetches the named pipeline" do
-        unused_build_runner = nil
-        pipeline_fetcher = Minitest::Mock.new
-        pipeline_runner = PipelineRunner.new('build-everything',
-                                             unused_build_runner)
-        pipeline_runner.pipeline_fetcher = pipeline_fetcher
-        pipeline_fetcher.expect(:fetch, nil, ['build-everything'])
-        pipeline_runner.run
-        pipeline_fetcher.verify
-      end
-
       it "fetches the pipeline's first job when pipeline found" do
         unused_build_runner = nil
         job_fetcher = Minitest::Mock.new
-        pipeline_runner = PipelineRunner.new('build-everything',
-                                             unused_build_runner)
+        pipeline_runner = PipelineRunner.new(unused_build_runner)
         pipeline_runner.job_fetcher = job_fetcher
 
         pipeline = Pipeline.new(name: 'foo', order: [['myjob']])
@@ -37,8 +25,7 @@ module Plumb
         def unused_job_fetcher.fetch(*); end
 
         build_runner = Minitest::Mock.new
-        pipeline_runner = PipelineRunner.new('build-everything',
-                                             build_runner)
+        pipeline_runner = PipelineRunner.new(build_runner)
         pipeline_runner.job_fetcher = unused_job_fetcher
 
         pipeline = Pipeline.new(name: 'foo', order: [['myjob']])
