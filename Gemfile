@@ -2,11 +2,10 @@ source "https://rubygems.org"
 
 gem 'aws-sdk'
 gem 'rake'
+gem 'grit'
 
 group :test do
-  gem 'm'
   gem 'debugger'
-  gem 'grit'
   gem 'minitest'
   gem 'gmail'
 end
