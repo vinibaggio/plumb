@@ -17,17 +17,17 @@ module Plumb
         )
       end
 
-      it "queues the first job when run" do
+      it "enqueues the first job into the waiting queue when run" do
         job1 = Object.new
         job2 = Object.new
-        queue = Minitest::Mock.new
+        waiting_queue = Queue.new
         pipeline = Pipeline.new(
-          queue: queue,
+          waiting_queue: waiting_queue,
           order: [[job1], [job2]]
         )
-        queue.expect(:<<, nil, [job1])
         pipeline.run
-        queue.verify
+        waiting_queue.size.must_equal 1
+        waiting_queue.pop.must_equal job1
       end
     end
   end

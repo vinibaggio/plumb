@@ -24,13 +24,13 @@ module Plumb
       attr_reader :name, :notification_email, :order
 
       def initialize(options)
-        @name, @order, @queue = options.values_at(
-          :name, :order, :queue
+        @name, @order, @waiting_queue = options.values_at(
+          :name, :order, :waiting_queue
         )
       end
 
       def run
-        @queue << first_job
+        @waiting_queue << first_job
       end
 
       def ==(other)
