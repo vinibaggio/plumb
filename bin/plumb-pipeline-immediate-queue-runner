@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require_relative '../lib/plumb/infrastructure/queue'
+
+module Plumb
+  module ImmediateQueueRunner
+    class << self
+      def call
+        immediate = Infrastructure::Queue.new('pipeline-immediate-queue')
+        loop do
+          item = immediate.pop
+          system item['script'] if item
+          sleep 1 unless item
+        end
+      end
+    end
+  end
+end
+Plumb::ImmediateQueueRunner.call
+
+

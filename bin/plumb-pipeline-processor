@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require_relative '../lib/plumb/domain/pipeline'
+
+module Plumb
+  module PipelineProcessor
+    def self.call
+      Domain::Pipeline.parse(
+        JSON.parse($stdin.read)
+      ).run
+    end
+  end
+end
+Plumb::PipelineProcessor.call

@@ -2,3 +2,4 @@ spec/support/gmail_config.yml
 config/aws.yml
 config/mail.yml
 tags
+queues

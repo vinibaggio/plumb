@@ -17,9 +17,10 @@ module Plumb
         )
       end
 
-      it "enqueues the first job into the waiting queue when run" do
+      it "enqueues the first job into the waiting queue" do
         job1 = Object.new
         job2 = Object.new
+
         waiting_queue = Queue.new
         pipeline = Pipeline.new(
           waiting_queue: waiting_queue,

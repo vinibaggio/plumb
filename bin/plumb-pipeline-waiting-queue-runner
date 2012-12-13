@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/plumb/infrastructure/queue'
+
+module Plumb
+  module WaitingQueueRunner
+    class << self
+      def call
+        waiting = Infrastructure::Queue.new('pipeline-waiting-queue')
+        immediate = Infrastructure::Queue.new('pipeline-immediate-queue')
+        waiting.clear
+        immediate.clear
+        loop do
+          puts "popping from waiting"
+          item = waiting.pop
+          immediate << item if item
+          sleep 1 unless item
+        end
+      end
+    end
+  end
+end
+Plumb::WaitingQueueRunner.call

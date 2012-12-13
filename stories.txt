@@ -1,0 +1,8 @@
+builds without dependencies are run immediately - success
+builds without dependencies are run immediately - failure
+user is notified of build failure
+user is notified of commits leading to a build failure
+builds with dependencies are run only after all dependencies are green
+user is notified of build success after a previous failure
+user can see history of build runs
+pipeline enqueues in reverse order (for efficiency)
