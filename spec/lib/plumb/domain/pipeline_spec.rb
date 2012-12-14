@@ -1,6 +1,5 @@
 require 'minitest/autorun'
 require_relative '../../../../lib/plumb/domain/pipeline'
-require_relative '../../../../lib/plumb/domain/build'
 
 module Plumb
   module Domain
