@@ -1,11 +1,8 @@
 require 'fileutils'
 require 'pathname'
+require 'tmpdir'
 
 class GitRepository
-  def initialize(options)
-    @email = options[:author]
-  end
-
   def create
     @path = Pathname.new(Dir.mktmpdir)
     exec "git init"
@@ -18,7 +15,7 @@ class GitRepository
   def create_bad_commit
     exec "echo 'bad rakefile contents' > Rakefile"
     exec "git add ."
-    exec "git commit --author='Some Author <#{@email}>' -m'Some Message'"
+    exec "git commit -m'Some Message'"
     exec "git rev-parse HEAD"
   end
 
