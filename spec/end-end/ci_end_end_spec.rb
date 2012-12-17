@@ -3,20 +3,9 @@ require 'pathname'
 require_relative '../support/pipeline_processor_driver'
 require_relative '../support/queue_runner_driver'
 require_relative '../support/git_repository'
+require_relative '../support/web_application_driver'
 
 describe "CI end-end" do
-  class WebApplicationDriver
-    def start
-    end
-
-    def stop
-    end
-
-    def shows_green_build_xml_for(*)
-      raise NotImplementedError
-    end
-  end
-
   let(:web_app) { WebApplicationDriver.new }
   let(:pipeline_processor) { PipelineProcessorDriver.new }
   let(:waiting_queue_runner) { QueueRunnerDriver.new('pipeline-waiting-queue-runner') }
@@ -31,9 +20,8 @@ describe "CI end-end" do
 
   it "shows a single green build in the feed" do
     services.each(&:start)
-
     repository.create
-
+    repository.create_good_commit
     pipeline_processor.run_pipeline(
       order: [
         [
@@ -45,7 +33,24 @@ describe "CI end-end" do
         ]
       ]
     )
-
     web_app.shows_green_build_xml_for('unit-tests')
+  end
+
+  it "shows a single red build in the feed" do
+    services.each(&:start)
+    repository.create
+    repository.create_bad_commit
+    pipeline_processor.run_pipeline(
+      order: [
+        [
+          {
+            name: 'unit-tests',
+            repository_url: repository.url,
+            script: 'rake'
+          }
+        ]
+      ]
+    )
+    web_app.shows_red_build_xml_for('unit-tests')
   end
 end
