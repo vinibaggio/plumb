@@ -9,7 +9,6 @@ module Plumb
         def parse(options)
           new(
             waiting_queue: Infrastructure::Queue.new('pipeline-waiting-queue'),
-            notification_email: options['notification_email'],
             order: options['order'].map {|step|
               step.map {|job_data|
                 Job.new(
@@ -23,7 +22,7 @@ module Plumb
         end
       end
 
-      attr_reader :name, :notification_email, :order
+      attr_reader :name, :order
 
       def initialize(options)
         @name, @order, @waiting_queue = options.values_at(

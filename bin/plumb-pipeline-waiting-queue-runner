@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative '../lib/plumb/infrastructure/queue'
+require_relative '../lib/plumb/infrastructure/queue_runner'
 
 module Plumb
   module WaitingQueueRunner
@@ -8,13 +9,19 @@ module Plumb
       def call
         waiting = Infrastructure::Queue.new('pipeline-waiting-queue')
         immediate = Infrastructure::Queue.new('pipeline-immediate-queue')
+        runner = Infrastructure::QueueRunner.new(
+          waiting,
+          ->{ sleep 1 }
+        )
+
         waiting.clear
         immediate.clear
+
         loop do
-          puts "popping from waiting"
-          item = waiting.pop
-          immediate << item if item
-          sleep 1 unless item
+          runner.run do |job|
+            puts "popped from waiting"
+            immediate << job
+          end
         end
       end
     end

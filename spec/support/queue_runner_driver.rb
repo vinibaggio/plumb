@@ -14,5 +14,6 @@ class QueueRunnerDriver
 
   def stop
     Process.kill('KILL', @pid) if @pid
+  rescue Errno::ESRCH
   end
 end
