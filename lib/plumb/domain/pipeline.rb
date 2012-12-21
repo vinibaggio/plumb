@@ -1,6 +1,6 @@
 require 'ostruct'
 require_relative 'job'
-require_relative '../infrastructure/queue'
+require_relative '../queue'
 
 module Plumb
   module Domain
@@ -8,7 +8,7 @@ module Plumb
       class << self
         def parse(options)
           new(
-            waiting_queue: Infrastructure::Queue.new('pipeline-waiting-queue'),
+            waiting_queue: Queue.new('pipeline-waiting-queue'),
             order: options['order'].map {|step|
               step.map {|job_data|
                 Job.new(

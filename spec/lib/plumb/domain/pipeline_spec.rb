@@ -20,7 +20,7 @@ module Plumb
         job1 = Object.new
         job2 = Object.new
 
-        waiting_queue = Queue.new
+        waiting_queue = ::Queue.new
         pipeline = Pipeline.new(
           waiting_queue: waiting_queue,
           order: [[job1], [job2]]

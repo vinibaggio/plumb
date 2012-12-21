@@ -1,20 +1,20 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require_relative '../lib/plumb/infrastructure/queue'
-require_relative '../lib/plumb/infrastructure/queue_runner'
+require_relative '../lib/plumb/queue'
+require_relative '../lib/plumb/queue_runner'
 
 module Plumb
   module ImmediateQueueRunner
     class << self
       def call
-        runner = Infrastructure::QueueRunner.new(
-          Infrastructure::Queue.new('pipeline-immediate-queue'),
+        runner = QueueRunner.new(
+          Queue.new('pipeline-immediate-queue'),
           ->{ sleep 1 }
         )
         #builder = Domain::Builder.new(
-          #Infrastructure::GitRepository.new,
-          #Infrastructure::Reporter.new
+          #GitRepository.new,
+          #Reporter.new
         #)
 
         #loop do
