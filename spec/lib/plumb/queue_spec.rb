@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'yaml'
 require_relative '../../../lib/plumb/queue'
-require_relative '../../../lib/plumb/domain/job'
+require_relative '../../../lib/plumb/job'
 
 module Plumb
   describe Queue do

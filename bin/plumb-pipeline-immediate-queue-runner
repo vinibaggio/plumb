@@ -12,7 +12,7 @@ module Plumb
           Queue.new('pipeline-immediate-queue'),
           ->{ sleep 1 }
         )
-        #builder = Domain::Builder.new(
+        #builder = Builder.new(
           #GitRepository.new,
           #Reporter.new
         #)

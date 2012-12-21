@@ -1,18 +1,18 @@
 require 'minitest/autorun'
 require 'thread'
 require_relative '../../../lib/plumb/queue_runner'
-require_relative '../../../lib/plumb/domain/job'
+require_relative '../../../lib/plumb/job'
 module Plumb
   describe QueueRunner do
     it "passes each job popped to a given block of code" do
       runner = QueueRunner.new(
         queue = ::Queue.new, ->{},
       )
-      queue << job1 = Domain::Job.new(name: 'job1')
-      queue << job2 = Domain::Job.new(name: 'job2')
-      queue << job3 = Domain::Job.new(name: 'job3')
-      queue << job4 = Domain::Job.new(name: 'job4')
-      queue << job5 = Domain::Job.new(name: 'job5')
+      queue << job1 = Job.new(name: 'job1')
+      queue << job2 = Job.new(name: 'job2')
+      queue << job3 = Job.new(name: 'job3')
+      queue << job4 = Job.new(name: 'job4')
+      queue << job5 = Job.new(name: 'job5')
 
       jobs_passed = []
       queue.size.times do
@@ -30,7 +30,7 @@ module Plumb
         queue = ::Queue.new,
         callable = MiniTest::Mock.new
       )
-      queue << Domain::Job.new(name: 'foo')
+      queue << Job.new(name: 'foo')
 
       callable.expect(:call, nil, [])
       runner.run do |job| end

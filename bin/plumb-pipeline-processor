@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require_relative '../lib/plumb/domain/pipeline'
+require_relative '../lib/plumb/pipeline'
 
 module Plumb
   module PipelineProcessor
     def self.call
-      Domain::Pipeline.parse(
+      Pipeline.parse(
         JSON.parse($stdin.read)
       ).run
     end
