@@ -33,6 +33,7 @@ describe "CI end-end" do
   end
 
   it "shows a single green build in the feed" do
+    web_app.start
     repository.create
     repository.create_good_commit
     queue_runners.each(&:start)
@@ -47,13 +48,12 @@ describe "CI end-end" do
         ]
       ]
     )
-    sleep 4
-    queue_runners.each(&:stop)
-    web_app.start
     web_app.shows_green_build_xml_for('unit-tests')
+    queue_runners.each(&:stop)
   end
 
   it "shows a single red build in the feed" do
+    web_app.start
     repository.create
     repository.create_bad_commit
     queue_runners.each(&:start)
@@ -68,10 +68,8 @@ describe "CI end-end" do
         ]
       ]
     )
-    sleep 1
-    queue_runners.each(&:stop)
-    web_app.start
     web_app.shows_red_build_xml_for('unit-tests')
+    queue_runners.each(&:stop)
   end
 
   it "shows builds in progress in the feed"
