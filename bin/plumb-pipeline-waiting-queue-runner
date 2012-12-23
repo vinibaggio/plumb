@@ -7,8 +7,10 @@ module Plumb
   module WaitingQueueRunner
     class << self
       def call
-        waiting = Queue.new('pipeline-waiting-queue')
-        immediate = Queue.new('pipeline-immediate-queue')
+        config = JSON.parse(File.read(ARGV[0]))
+
+        waiting = Queue.new(config.fetch('waiting_queue'))
+        immediate = Queue.new(config.fetch('immediate_queue'))
         runner = QueueRunner.new(
           waiting,
           ->{ sleep 1 }
@@ -19,7 +21,6 @@ module Plumb
 
         loop do
           runner.run do |job|
-            puts "popped from waiting"
             immediate << job
           end
         end

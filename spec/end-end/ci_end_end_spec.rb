@@ -6,11 +6,24 @@ require_relative '../support/git_repository'
 require_relative '../support/web_application_driver'
 
 describe "CI end-end" do
-  let(:web_app) { WebApplicationDriver.new }
-  let(:pipeline_processor) { PipelineProcessorDriver.new }
-  let(:waiting_queue_runner) { QueueRunnerDriver.new('pipeline-waiting-queue-runner') }
-  let(:immediate_queue_runner) { QueueRunnerDriver.new('pipeline-immediate-queue-runner') }
-  let(:repository) { GitRepository.new }
+  let(:web_app) { SpecSupport::WebApplicationDriver.new }
+  let(:pipeline_processor) { SpecSupport::PipelineProcessorDriver.new }
+  let(:config_path) {
+    File.expand_path('../../support/queue_config.json', __FILE__)
+  }
+  let(:waiting_queue_runner) {
+    SpecSupport::QueueRunnerDriver.new(
+      'pipeline-waiting-queue-runner',
+      config_path
+    )
+  }
+  let(:immediate_queue_runner) { 
+    SpecSupport::QueueRunnerDriver.new(
+      'pipeline-immediate-queue-runner',
+      config_path
+    )
+  }
+  let(:repository) { SpecSupport::GitRepository.new }
   let(:queue_runners) { [ waiting_queue_runner, immediate_queue_runner ] }
 
   after do
@@ -34,7 +47,7 @@ describe "CI end-end" do
         ]
       ]
     )
-    sleep 1
+    sleep 4
     queue_runners.each(&:stop)
     web_app.start
     web_app.shows_green_build_xml_for('unit-tests')
@@ -60,4 +73,6 @@ describe "CI end-end" do
     web_app.start
     web_app.shows_red_build_xml_for('unit-tests')
   end
+
+  it "shows builds in progress in the feed"
 end

@@ -1,25 +1,32 @@
 #!/usr/bin/env ruby
 
 require 'json'
+require 'tmpdir'
 require_relative '../lib/plumb/queue'
 require_relative '../lib/plumb/queue_runner'
+require_relative '../lib/plumb/git_repository'
+require_relative '../lib/plumb/build'
+require_relative '../lib/plumb/web_reporter'
 
 module Plumb
   module ImmediateQueueRunner
     class << self
       def call
+        config = JSON.parse(File.read(ARGV[0]))
+
         runner = QueueRunner.new(
-          Queue.new('pipeline-immediate-queue'),
+          Queue.new(config.fetch('immediate_queue')),
           ->{ sleep 1 }
         )
-        #builder = Builder.new(
-          #GitRepository.new,
-          #Reporter.new
-        #)
 
-        #loop do
-          #runner.run &builder.public_method(:build)
-        #end
+        repo = GitRepository.new(projects_dir = Dir.mktmpdir)
+        reporter = WebReporter.new(config.fetch('build_status_endpoint'))
+
+        loop do
+          runner.run do |job|
+            Build.new(job, repo, reporter).run
+          end
+        end
       end
     end
   end

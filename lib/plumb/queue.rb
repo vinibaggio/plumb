@@ -1,6 +1,11 @@
+require_relative 'message'
+
 module Plumb
   class Queue
+    attr_accessor :name
+
     def initialize(name, options = {})
+      @name = name
       @path = File.expand_path("../../.../../../queues/#{name}", __FILE__)
     end
 
@@ -12,8 +17,7 @@ module Plumb
 
     def pop
       lines = IO.readlines(@path)
-      line = lines.delete_at(0)
-      return nil if line.nil?
+      line = lines.delete_at(0) or return
       line.strip!
       File.open(@path, 'w') do |file|
         lines.each do |line|
@@ -27,16 +31,6 @@ module Plumb
     def clear
       File.unlink(@path)
     rescue Errno::ENOENT
-    end
-
-    class Message < String
-      def to_json
-        self
-      end
-
-      def [](key)
-        JSON.parse(self)[key]
-      end
     end
   end
 end

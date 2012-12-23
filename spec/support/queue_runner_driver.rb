@@ -1,19 +1,22 @@
-class QueueRunnerDriver
-  def initialize(queue_name)
-    @cmd_path = File.expand_path(
-      "../../../bin/plumb-#{queue_name}",
-      __FILE__
-    )
-  end
+module SpecSupport
+  class QueueRunnerDriver
+    def initialize(queue_name, config_path)
+      @cmd_path = File.expand_path(
+        "../../../bin/plumb-#{queue_name}",
+        __FILE__
+      )
+      @config_path = config_path
+    end
 
-  def start
-    @pid = Process.spawn(@cmd_path,
-                         :out => $stdout,
-                         :err => $stderr)
-  end
+    def start
+      @pid = Process.spawn("#{@cmd_path} #{@config_path}",
+                           :out => $stdout,
+                           :err => $stderr)
+    end
 
-  def stop
-    Process.kill('KILL', @pid) if @pid
-  rescue Errno::ESRCH
+    def stop
+      Process.kill('KILL', @pid) if @pid
+    rescue Errno::ESRCH
+    end
   end
 end

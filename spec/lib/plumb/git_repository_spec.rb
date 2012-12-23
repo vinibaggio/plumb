@@ -1,14 +1,49 @@
 require 'minitest/autorun'
+require 'tmpdir'
 require_relative '../../../lib/plumb/git_repository'
-require_relative '../../../lib/plumb/commit'
+require_relative '../../support/git_repository'
 
 module Plumb
+  class ListenerSpy
+    attr_reader :received_working_copy
+
+    def process_working_copy(working_copy)
+      @received_working_copy = working_copy
+    end
+
+    def received_dir_with_entries(expected_list)
+      working_copy_list.must_equal(expected_list)
+    end
+
+    private
+
+    def working_copy_list
+      Dir.glob(@received_working_copy.path.join('*')).
+        map &File.method(:basename)
+    end
+  end
+
   describe GitRepository do
-    it "contains a URL and commits" do
-      commit_1 = Plumb::Commit.new('somesha')
-      commit_2 = Plumb::Commit.new('someothersha')
-      repo = GitRepository.new('/somerepo', [commit_1, commit_2])
-      repo.commits.must_equal [commit_1, commit_2]
+    let(:repo_fixture) { SpecSupport::GitRepository.new }
+    let(:spy) { ListenerSpy.new }
+
+    after do
+      repo_fixture.destroy
+    end
+
+    it "clones the repo and passes the working dir to its listener" do
+      repo_fixture.create
+      repo_fixture.create_good_commit
+
+      projects_dir = Dir.mktmpdir
+      repo = GitRepository.new(projects_dir)
+
+      repo.fetch(repo_fixture.url, spy)
+
+      paths_in_repo = Dir.glob(repo_fixture.url.join('*'))
+      filenames_in_repo = paths_in_repo.map &File.method(:basename)
+
+      spy.received_dir_with_entries filenames_in_repo
     end
   end
 end

@@ -1,53 +1,39 @@
 require 'minitest/autorun'
 require 'thread'
 require_relative '../../../lib/plumb/queue_runner'
-require_relative '../../../lib/plumb/job'
+require_relative '../../../lib/plumb/queue'
+
 module Plumb
   describe QueueRunner do
-    it "passes each job popped to a given block of code" do
-      runner = QueueRunner.new(
-        queue = ::Queue.new, ->{},
-      )
-      queue << job1 = Job.new(name: 'job1')
-      queue << job2 = Job.new(name: 'job2')
-      queue << job3 = Job.new(name: 'job3')
-      queue << job4 = Job.new(name: 'job4')
-      queue << job5 = Job.new(name: 'job5')
+    let(:reject) { ->*{ raise "should not be called!" } }
 
-      jobs_passed = []
-      queue.size.times do
-        runner.run do |job|
-          jobs_passed << job
-        end
+    it "passes a popped job to a given block of code" do
+      runner = QueueRunner.new(
+        OpenStruct.new(pop: Message.new('{"name":"Greetings"}')),
+        ->{}
+      )
+
+      job_passed = nil
+      runner.run do |job|
+        job_passed = job
       end
 
-      jobs_passed.must_equal [job1, job2, job3, job4, job5]
-      queue.must_be_empty
+      job_passed.must_equal Job.new(name: 'Greetings')
     end
 
-    it "calls the post-processing callable after yielding" do
+    it "calls the callable if nothing was found" do
       runner = QueueRunner.new(
-        queue = ::Queue.new,
+        queue = OpenStruct.new(pop: nil),
         callable = MiniTest::Mock.new
       )
-      queue << Job.new(name: 'foo')
-
       callable.expect(:call, nil, [])
-      runner.run do |job| end
+      runner.run {}
       callable.verify
     end
 
-    it "doesn't yield nil jobs" do
-      runner = QueueRunner.new(
-        queue = ::Queue.new, ->{},
-      )
-      queue << nil
-
-      called = false
-      runner.run do |job|
-        called = true
-      end
-      called.must_equal false
+    it "returns nil when popping a nil job (doesn't yield)" do
+      QueueRunner.new(OpenStruct.new(pop: nil), ->{}).
+        run(&reject).must_be_nil
     end
   end
 end

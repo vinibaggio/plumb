@@ -1,0 +1,5 @@
+{
+  "immediate_queue": "pipeline-immediate-queue",
+  "waiting_queue": "pipeline-waiting-queue",
+  "build_status_endpoint": "http://localhost:5678/builds"
+}
