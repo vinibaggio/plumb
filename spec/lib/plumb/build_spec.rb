@@ -49,7 +49,11 @@ module Plumb
 
         build = Build.new(job, unused_repo, reporter)
 
-        reporter.expect(:build_completed, nil, [BuildStatus.new(:success)])
+        reporter.expect(
+          :build_completed,
+          nil,
+          [BuildStatus.new(build_id: 1, job: job, status: :success)]
+        )
         build.process_working_copy(working_copy)
         reporter.verify
       end
@@ -63,7 +67,11 @@ module Plumb
 
         build = Build.new(job, unused_repo, reporter)
 
-        reporter.expect(:build_completed, nil, [BuildStatus.new(:failure)])
+        reporter.expect(
+          :build_completed,
+          nil,
+          [BuildStatus.new(build_id: 1, job: job, status: :failure)]
+        )
         build.process_working_copy(working_copy)
         reporter.verify
       end

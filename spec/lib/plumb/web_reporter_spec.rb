@@ -8,11 +8,12 @@ module Plumb
     it "sends build statuses to an endpoint" do
       server = SpyServer.start(8000, '/builds/14')
       reporter = WebReporter.new("http://localhost:8000/builds")
-      status = BuildStatus.new(14, 'success')
+      status = BuildStatus.new(build_id: 14,
+                               status: 'success')
 
       reporter.build_completed(status)
 
-      server.last_request.must_equal ['PUT', status.to_json ]
+      server.last_request.must_equal ['PUT', status.to_json]
     end
   end
 end

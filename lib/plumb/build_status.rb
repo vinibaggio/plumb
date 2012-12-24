@@ -1,7 +1,8 @@
 require 'json'
+require 'ostruct'
 
 module Plumb
-  class BuildStatus < Struct.new(:build_id, :status)
+  class BuildStatus < OpenStruct
     def failure?
       status == :failure
     end
@@ -11,10 +12,7 @@ module Plumb
     end
 
     def to_json
-      JSON.generate(
-        build_id: build_id,
-        status: status
-      )
+      JSON.generate(@table)
     end
   end
 end
