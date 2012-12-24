@@ -46,6 +46,8 @@ GEM
     rack (1.4.1)
     rack-protection (1.3.2)
       rack
+    rack-test (0.6.2)
+      rack (>= 1.0)
     rake (10.0.2)
     sinatra (1.3.3)
       rack (~> 1.3, >= 1.3.6)
@@ -66,5 +68,6 @@ DEPENDENCIES
   gmail
   grit
   minitest
+  rack-test
   rake
   sinatra
