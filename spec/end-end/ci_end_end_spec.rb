@@ -49,7 +49,6 @@ describe "CI end-end" do
       ]
     )
     web_app.shows_green_build_xml_for('unit-tests')
-    queue_runners.each(&:stop)
   end
 
   it "shows a single red build in the feed" do
@@ -69,7 +68,6 @@ describe "CI end-end" do
       ]
     )
     web_app.shows_red_build_xml_for('unit-tests')
-    queue_runners.each(&:stop)
   end
 
   it "shows builds in progress in the feed"
