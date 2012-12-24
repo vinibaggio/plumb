@@ -1,16 +1,18 @@
-require 'rack/test'
 require 'nokogiri'
+require 'httparty'
 require_relative '../../web/server'
 
 module SpecSupport
   class WebApplicationDriver
-    include Rack::Test::Methods
-
     def start
-      @app = Sinatra::Application
+      @pid = Process.spawn("web/server.rb",
+                           :out => $stdout,
+                           :err => $stderr)
     end
 
     def stop
+      Process.kill('KILL', @pid) if @pid
+    rescue Errno::ESRCH
     end
 
     def shows_green_build_xml_for(project_name)
@@ -27,17 +29,13 @@ module SpecSupport
 
     private
 
-    def feed
-      get '/dashboard/cctray.xml'
-      Nokogiri::XML(last_response.body)
-    end
-
     def project(name)
       feed.css("Projects>Project[name='#{name}']").first
     end
 
-    def app
-      @app
+    def feed
+      response = HTTParty.get("http://localhost:4567/dashboard/cctray.xml")
+      Nokogiri::XML(response.body)
     end
   end
 end
