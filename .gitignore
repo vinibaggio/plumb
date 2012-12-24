@@ -3,3 +3,4 @@ config/aws.yml
 config/mail.yml
 tags
 queues
+web/db.json

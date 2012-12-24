@@ -34,6 +34,7 @@ describe "CI end-end" do
 
   it "shows a single green build in the feed" do
     web_app.start
+    web_app.clear
     repository.create
     repository.create_good_commit
     queue_runners.each(&:start)
@@ -53,6 +54,7 @@ describe "CI end-end" do
 
   it "shows a single red build in the feed" do
     web_app.start
+    web_app.clear
     repository.create
     repository.create_bad_commit
     queue_runners.each(&:start)
