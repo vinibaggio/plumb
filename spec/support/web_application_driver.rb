@@ -13,26 +13,30 @@ module SpecSupport
       @pid = Process.spawn("web/server.rb",
                            :out => $stdout,
                            :err => $stderr)
-      until server_is_up? do sleep 0.5 end
+      probe_until('server up') { server_is_up? }
+      self
     end
 
     def stop
       Process.kill('KILL', @pid) if @pid
+      self
     rescue Errno::ESRCH
+      self
     end
 
-    def clear
+    def with_no_data
       Server.delete("/jobs/all")
+      self
     end
 
     def shows_green_build_xml_for(project_name)
-      sleep 5
+      probe_until('green project available in feed') { project(project_name) }
       project(project_name)['activity'].must_equal 'Sleeping'
       project(project_name)['lastBuildStatus'].must_equal 'Success'
     end
 
     def shows_red_build_xml_for(project_name)
-      sleep 5
+      probe_until('red project available in feed') { project(project_name) }
       project(project_name)['activity'].must_equal 'Sleeping'
       project(project_name)['lastBuildStatus'].must_equal 'Failure'
     end
@@ -55,6 +59,27 @@ module SpecSupport
     def feed
       response = Server.get("/dashboard/cctray.xml")
       Nokogiri::XML(response.body)
+    end
+
+    def probe_until(description, &block)
+      puts "----- Probe until #{description}"
+      tries = 0
+      value = nil
+
+      until (value = yield) || tries == 10 do
+        puts "-- Got value: #{value}"
+        tries += 1
+        sleep 0.5
+      end
+
+      message =
+        "-- Probing until '#{description}' reached its limit\n\n" +
+        "-- Last value: #{value}\n\n"
+
+      if tries == 10
+        puts message
+        raise message
+      end
     end
   end
 end

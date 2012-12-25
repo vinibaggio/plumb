@@ -24,7 +24,7 @@ describe "CI end-end" do
     )
   }
   let(:repository) { SpecSupport::GitRepository.new }
-  let(:queue_runners) { [ waiting_queue_runner, immediate_queue_runner ] }
+  let(:queue_runners) { [waiting_queue_runner, immediate_queue_runner] }
 
   after do
     repository.destroy
@@ -33,8 +33,8 @@ describe "CI end-end" do
   end
 
   it "shows a single green build in the feed" do
-    web_app.start
-    web_app.clear
+    web_app.start.with_no_data
+
     repository.create
     repository.create_good_commit
     queue_runners.each(&:start)
@@ -53,8 +53,8 @@ describe "CI end-end" do
   end
 
   it "shows a single red build in the feed" do
-    web_app.start
-    web_app.clear
+    web_app.start.with_no_data
+
     repository.create
     repository.create_bad_commit
     queue_runners.each(&:start)
