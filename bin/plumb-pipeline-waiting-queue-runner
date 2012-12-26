@@ -16,9 +16,6 @@ module Plumb
           ->{ sleep 1 }
         )
 
-        waiting.clear
-        immediate.clear
-
         loop do
           runner.run do |job|
             immediate << job
