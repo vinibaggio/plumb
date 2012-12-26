@@ -35,15 +35,23 @@ module Plumb
       repo_fixture.create
       repo_fixture.create_good_commit
 
-      projects_dir = Dir.mktmpdir
-      repo = GitRepository.new(projects_dir)
+      Dir.mktmpdir do |projects_dir|
+        repo = GitRepository.new(projects_dir)
 
-      repo.fetch(repo_fixture.url, spy)
+        repo.fetch(repo_fixture.url, spy)
 
-      paths_in_repo = Dir.glob(repo_fixture.url.join('*'))
-      filenames_in_repo = paths_in_repo.map &File.method(:basename)
+        paths_in_repo = Dir.glob(repo_fixture.url.join('*'))
+        filenames_in_repo = paths_in_repo.map &File.method(:basename)
 
-      spy.received_dir_with_entries filenames_in_repo
+        spy.received_dir_with_entries filenames_in_repo
+      end
+    end
+
+    it "raises an exception if the repository cannot be cloned" do
+      Dir.mktmpdir do |dir|
+        repo = GitRepository.new(dir)
+        ->{ repo.fetch('/bad/url') }.must_raise GitRepository::CloneError
+      end
     end
   end
 end

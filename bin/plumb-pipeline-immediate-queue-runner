@@ -19,12 +19,14 @@ module Plumb
           ->{ sleep 1 }
         )
 
-        repo = GitRepository.new(projects_dir = Dir.mktmpdir)
-        reporter = WebReporter.new(config.fetch('build_status_endpoint'))
+        Dir.mktmpdir do |projects_dir|
+          repo = GitRepository.new(projects_dir)
+          reporter = WebReporter.new(config.fetch('build_status_endpoint'))
 
-        loop do
-          runner.run do |job|
-            Build.new(job, repo, reporter).run
+          loop do
+            runner.run do |job|
+              Build.new(job, repo, reporter).run
+            end
           end
         end
       end

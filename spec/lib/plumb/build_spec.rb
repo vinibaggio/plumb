@@ -28,16 +28,19 @@ module Plumb
         job = Job.new(script: './make_stuff_happen')
         side_effect_file = Tempfile.new('side_effect_receiver')
         script = "echo 'script output' > #{side_effect_file.path}"
-        working_copy = Dir.new(Dir.mktmpdir)
-        File.open(working_copy.path + "/make_stuff_happen", 'w') do |file|
-          file << script
-          file.chmod(500)
+
+        Dir.mktmpdir do |working_copy_path|
+          working_copy = Dir.new(working_copy_path)
+          File.open(working_copy.path + "/make_stuff_happen", 'w') do |file|
+            file << script
+            file.chmod(500)
+          end
+
+          build = Build.new(job, unused_repo, unused_reporter)
+          build.process_working_copy(working_copy)
+
+          side_effect_file.read.strip.must_equal "script output"
         end
-
-        build = Build.new(job, unused_repo, unused_reporter)
-        build.process_working_copy(working_copy)
-
-        side_effect_file.read.strip.must_equal "script output"
       end
     end
 
@@ -45,17 +48,19 @@ module Plumb
       it "sends a successful build to the reporter" do
         reporter = MiniTest::Mock.new
         job = Job.new(script: 'true')
-        working_copy = Dir.new(Dir.mktmpdir)
+        Dir.mktmpdir do |working_copy_path|
+          working_copy = Dir.new(working_copy_path)
 
-        build = Build.new(job, unused_repo, reporter)
+          build = Build.new(job, unused_repo, reporter)
 
-        reporter.expect(
-          :build_completed,
-          nil,
-          [BuildStatus.new(build_id: 1, job: job, status: :success)]
-        )
-        build.process_working_copy(working_copy)
-        reporter.verify
+          reporter.expect(
+            :build_completed,
+            nil,
+            [BuildStatus.new(build_id: 1, job: job, status: :success)]
+          )
+          build.process_working_copy(working_copy)
+          reporter.verify
+        end
       end
     end
 
@@ -63,17 +68,19 @@ module Plumb
       it "sends a failed build to the reporter" do
         reporter = MiniTest::Mock.new
         job = Job.new(script: 'false')
-        working_copy = Dir.new(Dir.mktmpdir)
+        Dir.mktmpdir do |working_copy_path|
+          working_copy = Dir.new(working_copy_path)
 
-        build = Build.new(job, unused_repo, reporter)
+          build = Build.new(job, unused_repo, reporter)
 
-        reporter.expect(
-          :build_completed,
-          nil,
-          [BuildStatus.new(build_id: 1, job: job, status: :failure)]
-        )
-        build.process_working_copy(working_copy)
-        reporter.verify
+          reporter.expect(
+            :build_completed,
+            nil,
+            [BuildStatus.new(build_id: 1, job: job, status: :failure)]
+          )
+          build.process_working_copy(working_copy)
+          reporter.verify
+        end
       end
     end
 
