@@ -1,3 +1,5 @@
+require_relative '../../lib/plumb/queue'
+
 module SpecSupport
   class QueueRunnerDriver
     def initialize(queue_name, config_path)

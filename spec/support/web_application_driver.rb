@@ -19,8 +19,8 @@ module SpecSupport
 
     def stop
       Process.kill('KILL', @pid) if @pid
-      self
     rescue Errno::ESRCH
+    ensure
       self
     end
 
@@ -30,13 +30,15 @@ module SpecSupport
     end
 
     def shows_green_build_xml_for(project_name)
-      probe_until('green project available in feed') { project(project_name) }
-      project(project_name)['activity'].must_equal 'Sleeping'
-      project(project_name)['lastBuildStatus'].must_equal 'Success'
+      probe_until('green build available in feed') { project(project_name) }
+      project(project_name)['activity'].must_equal 'Sleeping',
+        feed
+      project(project_name)['lastBuildStatus'].must_equal 'Success',
+        feed
     end
 
     def shows_red_build_xml_for(project_name)
-      probe_until('red project available in feed') { project(project_name) }
+      probe_until('red build available in feed') { project(project_name) }
       project(project_name)['activity'].must_equal 'Sleeping'
       project(project_name)['lastBuildStatus'].must_equal 'Failure'
     end
@@ -44,7 +46,7 @@ module SpecSupport
     private
 
     def server_is_up?
-      Server.get("/jobs")
+      Server.get("/dashboard/cctray.xml")
       true
     rescue Errno::ECONNREFUSED
       false
@@ -62,12 +64,12 @@ module SpecSupport
     end
 
     def probe_until(description, &block)
-      puts "----- Probe until #{description}"
+      #puts "----- Probe until #{description}"
       tries = 0
       value = nil
 
       until (value = yield) || tries == 10 do
-        puts "-- Got value: #{value}"
+        #puts "-- Got value: #{value}"
         tries += 1
         sleep 0.5
       end
@@ -77,8 +79,7 @@ module SpecSupport
         "-- Last value: #{value}\n\n"
 
       if tries == 10
-        puts message
-        raise message
+        $stderr.puts message
       end
     end
   end

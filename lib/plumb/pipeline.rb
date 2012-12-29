@@ -5,9 +5,9 @@ require_relative 'queue'
 module Plumb
   class Pipeline
     class << self
-      def parse(options)
+      def parse(options, config)
         new(
-          waiting_queue: Queue.new('pipeline-waiting-queue'),
+          waiting_queue: Queue.new(config.fetch('waiting_queue')),
           order: options['order'].map {|step|
           step.map {|job_data|
             Job.new(

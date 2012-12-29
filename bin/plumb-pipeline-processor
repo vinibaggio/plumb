@@ -6,8 +6,11 @@ require_relative '../lib/plumb/pipeline'
 module Plumb
   module PipelineProcessor
     def self.call
+      config = JSON.parse(File.read(ARGV[0]))
+
       Pipeline.parse(
-        JSON.parse($stdin.read)
+        JSON.parse($stdin.read),
+        config
       ).run
     end
   end
