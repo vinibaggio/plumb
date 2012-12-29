@@ -11,8 +11,8 @@ module SpecSupport
 
     def start
       @pid = Process.spawn("web/server.rb",
-                           :out => $stdout,
-                           :err => $stderr)
+                           :out => '/dev/null',
+                           :err => '/dev/null')
       probe_until('server up') { server_is_up? }
       self
     end
