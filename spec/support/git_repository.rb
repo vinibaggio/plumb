@@ -31,6 +31,15 @@ module SpecSupport
       @path
     end
 
+    def project_name
+      File.basename(url)
+    end
+
+    def filenames
+      paths_in_repo = Dir.glob(url.join('*'))
+      filenames_in_repo = paths_in_repo.map &File.public_method(:basename)
+    end
+
     private 
 
     def exec(cmd)

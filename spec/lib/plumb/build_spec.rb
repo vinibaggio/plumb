@@ -84,6 +84,22 @@ module Plumb
       end
     end
 
+    describe "when clone fails" do
+      it "sends a failed build to the reporter" do
+        reporter = MiniTest::Mock.new
+        job = Job.new(script: 'whatever')
+        build = Build.new(job, unused_repo, reporter)
+
+        reporter.expect(
+          :build_completed,
+          nil,
+          [BuildStatus.new(build_id: 1, job: job, status: :failure)]
+        )
+        build.handle_clone_failure
+        reporter.verify
+      end
+    end
+
     describe "when the code is not available" do
       it "sends a failed build to the reporter"
     end
