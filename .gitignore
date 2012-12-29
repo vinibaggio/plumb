@@ -1,6 +1,4 @@
-spec/support/gmail_config.yml
+spec/support/queue_config.json
 config/aws.yml
-config/mail.yml
 tags
-queues
 web/db.json
