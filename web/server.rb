@@ -33,8 +33,12 @@ module Plumb
 
     private
 
+    def database_name
+      "db-#{ENV['RACK_ENV'] || 'production'}.json"
+    end
+
     def storage_path
-      File.expand_path('../db.json', __FILE__).tap do |path|
+      File.expand_path("../#{database_name}", __FILE__).tap do |path|
         unless File.exists?(path)
           File.open(path, 'w') do |file|
             file << '[]'
