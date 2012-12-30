@@ -20,7 +20,7 @@ module Plumb
       end
     end
 
-    class NullListener
+    module NullListener
       class << self
         def process_working_copy(*); end
         def handle_clone_failure(*); end

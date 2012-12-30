@@ -15,6 +15,8 @@ module Plumb
 
       server.last_request.must_equal ['PUT', status.to_json]
     end
+
+    it "echoes to stderr when the web server is unavailable"
   end
 end
 

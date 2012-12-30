@@ -26,7 +26,8 @@ describe "web server" do
 
     get '/dashboard/cctray.xml'
 
-    assert project('AceProject'), "The stored Job did not appear as a Project in the feed:\n\n#{feed.to_s}"
+    assert project('AceProject'),
+      "The stored Job did not appear as a Project in the feed:\n\n#{feed.to_s}"
     project('AceProject')['lastBuildStatus'].must_equal 'Success'
   end
 
@@ -41,7 +42,8 @@ describe "web server" do
 
     get '/dashboard/cctray.xml'
 
-    assert project('My Project'), "The stored Job did not appear as a Project in the feed:\n\n#{feed.to_s}"
+    assert project('My Project'),
+      "The stored Job did not appear as a Project in the feed:\n\n#{feed.to_s}"
     project('My Project')['lastBuildStatus'].must_equal 'Failure'
   end
 
