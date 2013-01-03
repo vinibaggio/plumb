@@ -1,11 +1,10 @@
 require 'minitest/autorun'
 require 'yaml'
-require 'securerandom'
-require_relative '../../../lib/plumb/sqs_queue'
 require_relative '../../support/shared_examples/queues.rb'
+require_relative '../../../lib/plumb/sqs_queue'
 
 module Plumb
-  class SqsQueueSpec < QueueSpec
+  class SqsQueueSpec < SpecSupport::QueueSpec
     def queue_named(name)
       SqsQueue.new(
         name,
