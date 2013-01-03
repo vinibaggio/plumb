@@ -30,7 +30,11 @@ class SpyServer
   private
 
   def server
-    @server ||= WEBrick::HTTPServer.new(Port: @port)
+    @server ||= WEBrick::HTTPServer.new(
+      Port: @port,
+      AccessLog: [],
+      Logger: WEBrick::Log.new('/dev/null', 7)
+    )
   end
 
   class PutServlet < WEBrick::HTTPServlet::AbstractServlet

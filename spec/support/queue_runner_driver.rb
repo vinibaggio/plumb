@@ -12,8 +12,8 @@ module SpecSupport
 
     def start
       @pid = Process.spawn("#{@cmd_path} #{@config_path}",
-                           :out => $stdout,
-                           :err => $stderr)
+                           :out => '/dev/null',
+                           :err => '/dev/null')
     end
 
     def stop
