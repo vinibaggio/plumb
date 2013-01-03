@@ -83,7 +83,7 @@ describe "CI end-end" do
 
   def delete_queues
     %w(waiting_queue immediate_queue).each do |name|
-      Plumb::Queue.new(
+      Plumb::SqsQueue.new(
         JSON.parse(File.read(config_path))[name]
       ).destroy
     end

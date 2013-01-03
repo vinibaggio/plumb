@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'thread'
 require_relative '../../../lib/plumb/queue_runner'
-require_relative '../../../lib/plumb/queue'
+require_relative '../../../lib/plumb/sqs_queue'
 
 module Plumb
   describe QueueRunner do

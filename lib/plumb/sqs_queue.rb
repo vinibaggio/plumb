@@ -2,7 +2,7 @@ require 'aws/sqs'
 require_relative 'message'
 
 module Plumb
-  class Queue
+  class SqsQueue
     attr_accessor :name
 
     def initialize(name, options = {})

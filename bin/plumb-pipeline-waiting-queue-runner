@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative '../lib/plumb/queue'
+require_relative '../lib/plumb/sqs_queue'
 require_relative '../lib/plumb/queue_runner'
 
 module Plumb
@@ -9,8 +9,8 @@ module Plumb
       def call
         config = JSON.parse(File.read(ARGV[0]))
 
-        waiting = Queue.new(config.fetch('waiting_queue'))
-        immediate = Queue.new(config.fetch('immediate_queue'))
+        waiting = SqsQueue.new(config.fetch('waiting_queue'))
+        immediate = SqsQueue.new(config.fetch('immediate_queue'))
         runner = QueueRunner.new(
           waiting,
           ->{ sleep 1 }

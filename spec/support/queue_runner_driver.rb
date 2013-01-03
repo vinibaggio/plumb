@@ -1,4 +1,4 @@
-require_relative '../../lib/plumb/queue'
+require_relative '../../lib/plumb/sqs_queue'
 
 module SpecSupport
   class QueueRunnerDriver

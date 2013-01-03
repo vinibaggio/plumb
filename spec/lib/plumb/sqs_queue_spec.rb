@@ -1,10 +1,10 @@
 require 'minitest/autorun'
 require 'yaml'
 require 'securerandom'
-require_relative '../../../lib/plumb/queue'
+require_relative '../../../lib/plumb/sqs_queue'
 
 module Plumb
-  describe Queue do
+  describe SqsQueue do
     THREADS = []
 
     let(:config) {
@@ -37,14 +37,14 @@ module Plumb
     end
 
     it "pops nil when everything has been popped" do
-      @queues << queue = Queue.new(generate_name, config)
+      @queues << queue = SqsQueue.new(generate_name, config)
       queue << item('[]')
       queue.pop
       queue.pop.must_be_nil
     end
 
     it "can add and pop items in a single instance" do
-      @queues << queue = Queue.new(generate_name, config)
+      @queues << queue = SqsQueue.new(generate_name, config)
       obj = Struct.new(:to_json).new '{"foo":"bar"}'
       queue << obj
       queue.pop.must_equal obj.to_json
@@ -52,24 +52,24 @@ module Plumb
 
     it "can add and pop items across instances with same name" do
       shared_name = generate_name
-      @queues << queue1 = Queue.new(shared_name, config)
-      @queues << queue2 = Queue.new(shared_name, config)
+      @queues << queue1 = SqsQueue.new(shared_name, config)
+      @queues << queue2 = SqsQueue.new(shared_name, config)
       obj = item('{"baz":"qux"}')
       queue1 << obj
       queue2.pop.must_equal obj.to_json
     end
 
     it "doesn't share queue items across instances with different names" do
-      @queues << queue1 = Queue.new(generate_name, config)
-      @queues << queue2 = Queue.new(generate_name, config)
+      @queues << queue1 = SqsQueue.new(generate_name, config)
+      @queues << queue2 = SqsQueue.new(generate_name, config)
       obj = item('{"baz":"qux"}')
       queue1 << obj
       queue2.pop.must_be_nil
     end
 
     it "can enqueue the direct output of another queue" do
-      @queues << queue1 = Queue.new(generate_name, config)
-      @queues << queue2 = Queue.new(generate_name, config)
+      @queues << queue1 = SqsQueue.new(generate_name, config)
+      @queues << queue2 = SqsQueue.new(generate_name, config)
       obj = item('{"baz":"qux"}')
       queue1 << obj
       queue2 << queue1.pop
@@ -77,7 +77,7 @@ module Plumb
     end
 
     it "returns multiple queued items" do
-      @queues << queue = Queue.new(generate_name, config)
+      @queues << queue = SqsQueue.new(generate_name, config)
       item1 = item('{"baz":"qux"}')
       item2 = item('{"bar":"foo"}')
       queue << item1
@@ -95,7 +95,7 @@ module Plumb
     end
 
     it "allows access to message properties" do
-      @queues << queue = Queue.new(generate_name, config)
+      @queues << queue = SqsQueue.new(generate_name, config)
       obj = item('{"baz":"qux"}')
       queue << obj
       queue.pop['baz'].must_equal 'qux'
