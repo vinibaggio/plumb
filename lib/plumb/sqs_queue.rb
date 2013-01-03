@@ -3,10 +3,7 @@ require_relative 'message'
 
 module Plumb
   class SqsQueue
-    attr_accessor :name
-
     def initialize(name, options = {})
-      @name = name
       sqs = AWS::SQS.new(options)
       @queue = sqs.queues.named(name)
     rescue AWS::SQS::Errors::NonExistentQueue

@@ -1,6 +1,6 @@
 module Plumb
   class Message < String
-    def to_json
+    def to_json(*)
       self
     end
 

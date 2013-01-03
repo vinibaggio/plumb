@@ -17,5 +17,9 @@ module Plumb
       Message.new(JSON.generate(attributes)).
         attributes.must_equal(attributes)
     end
+
+    it "takes a single, unused argument to JSON, for compatibility" do
+      Message.new('{"foo":"bar"}').to_json('baz').must_equal('{"foo":"bar"}')
+    end
   end
 end
