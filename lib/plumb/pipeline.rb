@@ -1,4 +1,5 @@
 require 'ostruct'
+require_relative '../plumb'
 require_relative 'job'
 require_relative 'sqs_queue'
 
@@ -7,7 +8,9 @@ module Plumb
     class << self
       def parse(options, config)
         new(
-          waiting_queue: SqsQueue.new(config.fetch('waiting_queue')),
+          waiting_queue: Plumb.queue_driver(config).new(
+            config.fetch('waiting_queue')
+          ),
           order: options['order'].map {|step|
           step.map {|job_data|
             Job.new(

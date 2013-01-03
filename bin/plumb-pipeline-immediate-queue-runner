@@ -2,7 +2,7 @@
 
 require 'json'
 require 'tmpdir'
-require_relative '../lib/plumb/sqs_queue'
+require_relative '../lib/plumb'
 require_relative '../lib/plumb/queue_runner'
 require_relative '../lib/plumb/git_repository'
 require_relative '../lib/plumb/build'
@@ -13,9 +13,10 @@ module Plumb
     class << self
       def call
         config = JSON.parse(File.read(ARGV[0]))
+        driver = Plumb.queue_driver(config)
 
         runner = QueueRunner.new(
-          SqsQueue.new(config.fetch('immediate_queue')),
+          driver.new(config.fetch('immediate_queue')),
           ->{ sleep 1 }
         )
 
