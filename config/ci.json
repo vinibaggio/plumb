@@ -1,0 +1,10 @@
+{
+  // alternatively, use "SqsQueue"
+  "driver": "ResqueQueue",
+
+  "immediate_queue": "plumb-immediate-queue",
+  "waiting_queue": "plumb-waiting-queue",
+
+  // where the web server is
+  "build_status_endpoint": "http://localhost:4567/builds"
+}
