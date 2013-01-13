@@ -6,12 +6,21 @@ require_relative 'sqs_queue'
 module Plumb
   class Pipeline
     class << self
-      def parse(options, config)
-        new(
-          waiting_queue: Plumb.queue_driver(config).new(
-            config.fetch('waiting_queue')
-          ),
-          order: options['order'].map {|step|
+      def parse(options, queue_config)
+        new(order: job_order(options['order']),
+            waiting_queue: waiting_queue(queue_config))
+      end
+
+      private
+
+      def waiting_queue(config)
+        Plumb.queue_driver(config).new(
+          config.fetch('waiting_queue')
+        )
+      end
+
+      def job_order(order)
+        order.map {|step|
           step.map {|job_data|
             Job.new(
               name: job_data['name'],
@@ -20,16 +29,14 @@ module Plumb
             )
           }
         }
-        )
       end
     end
 
     attr_reader :name, :order
 
     def initialize(options)
-      @name, @order, @waiting_queue = options.values_at(
-        :name, :order, :waiting_queue
-      )
+      @name, @order, @waiting_queue =
+        options.values_at(:name, :order, :waiting_queue)
     end
 
     def run

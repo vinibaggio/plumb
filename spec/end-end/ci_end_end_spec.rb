@@ -8,23 +8,25 @@ require_relative '../support/git_repository'
 require_relative '../support/web_application_driver'
 
 describe "CI end-end" do
-  let(:queue_driver) { Plumb::ResqueQueue }
-  let(:web_app) { SpecSupport::WebApplicationDriver.new }
-  let(:pipeline_processor) { SpecSupport::PipelineProcessorDriver.new(config_path) }
-  let(:config_path) {
+  let(:queue_config_path) {
     File.expand_path('../../support/queue_config.json', __FILE__)
   }
-  let(:queue_config) { JSON.parse(File.read(config_path)) }
+  let(:queue_config) { JSON.parse(File.read(queue_config_path)) }
+  let(:queue_driver) { Plumb::ResqueQueue }
+  let(:web_app) { SpecSupport::WebApplicationDriver.new }
+  let(:pipeline_processor) {
+    SpecSupport::PipelineProcessorDriver.new(queue_config_path)
+  }
   let(:waiting_queue_runner) {
     SpecSupport::QueueRunnerDriver.new(
       'pipeline-waiting-queue-runner',
-      config_path
+      queue_config_path
     )
   }
   let(:immediate_queue_runner) {
     SpecSupport::QueueRunnerDriver.new(
       'pipeline-immediate-queue-runner',
-      config_path
+      queue_config_path
     )
   }
   let(:queue_suffix) { SecureRandom.uuid }
@@ -92,7 +94,7 @@ describe "CI end-end" do
   end
 
   def write_new_queue_config
-    File.open(config_path, 'w') do |file|
+    File.open(queue_config_path, 'w') do |file|
       file << JSON.generate(
         driver: queue_driver.name.split('::').last,
         immediate_queue: "pipeline-immediate-queue-#{queue_suffix}",
