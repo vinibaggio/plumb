@@ -9,7 +9,7 @@ group :test do
   gem 'aws-sdk'
   gem 'resque'
   gem 'rack-test'
-  gem 'debugger'
+  gem 'pry'
   gem 'minitest'
   gem 'gmail'
 end
