@@ -1,11 +1,9 @@
 require 'minitest/autorun'
 require 'pathname'
 require 'securerandom'
+require 'json'
+require_relative '../support'
 require_relative '../../lib/plumb'
-require_relative '../support/pipeline_processor_driver'
-require_relative '../support/queue_runner_driver'
-require_relative '../support/git_repository'
-require_relative '../support/web_application_driver'
 
 describe "CI end-end" do
   let(:queue_config_path) {
