@@ -2,50 +2,36 @@
 require 'sinatra/base'
 require_relative '../lib/plumb/build_status'
 require_relative '../lib/plumb/job'
+require_relative '../lib/plumb/filesystem_job_storage'
 
 module Plumb
   class Server < Sinatra::Base
     FEED_PATH = File.expand_path('../cc.xml', __FILE__)
+    DATABASE_NAME = "db-#{ENV['RACK_ENV'] || 'production'}.json"
+    STORAGE = Plumb::FileSystemJobStorage.new(
+      ENV['RACK_ENV'],
+      File.expand_path("../#{DATABASE_NAME}", __FILE__)
+    )
 
     get '/dashboard/cctray.xml' do
-      @jobs = JSON.parse(File.read(storage_path)).map {|attributes|
-        Plumb::Job.new(attributes)
-      }
+      @jobs = STORAGE.jobs
       erb :cctray
     end
 
     put "/builds/:id" do
       build_status = Plumb::BuildStatus.new(JSON.parse(request.body.read))
-      jobs = JSON.parse(File.read(storage_path))
-      jobs << build_status.job.merge(
+      STORAGE << build_status.job.merge(
         last_build_status: build_status.status
       )
-      File.open(storage_path, 'w') do |file|
-        file << jobs.to_json
-      end
       '{}'
     end
 
     delete "/jobs/:id" do
-      File.unlink storage_path
+      STORAGE.clear
       '{}'
     end
 
     private
-
-    def database_name
-      "db-#{ENV['RACK_ENV'] || 'production'}.json"
-    end
-
-    def storage_path
-      File.expand_path("../#{database_name}", __FILE__).tap do |path|
-        unless File.exists?(path)
-          File.open(path, 'w') do |file|
-            file << '[]'
-          end
-        end
-      end
-    end
 
     run! if app_file == $0
   end
