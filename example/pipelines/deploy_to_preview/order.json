@@ -1,7 +1,0 @@
-[
-  ["test_api", "test_ios_units", "test_web_units"],
-  "deploy_api_staging",
-  ["test_ios_integration", "test_web_integration"],
-  "deploy_api_preview",
-  "deploy_web"
-]
