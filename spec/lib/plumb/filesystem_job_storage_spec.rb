@@ -11,8 +11,8 @@ module Plumb
         storage2 = FileSystemJobStorage.new('test', path)
 
         storage1 << job = Job.new(foo: 'bar')
-        storage1.jobs.must_equal [job]
-        storage2.jobs.must_equal [job]
+        storage1.to_a.must_equal [job]
+        storage2.to_a.must_equal [job]
       end
     end
 
@@ -20,12 +20,13 @@ module Plumb
       with_nonexistent_file_path do |path|
         storage1 = FileSystemJobStorage.new('test', path)
         storage2 = FileSystemJobStorage.new('test', path)
+        storage1.clear
         storage1 << job = Job.new(foo: 'bar')
 
-        storage2.jobs.wont_be :empty?
+        storage2.to_a.wont_be :empty?
         storage1.clear
-        storage1.jobs.must_be :empty?
-        storage2.jobs.must_be :empty?
+        storage1.to_a.must_be :empty?
+        storage2.to_a.must_be :empty?
       end
     end
 

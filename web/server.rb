@@ -14,7 +14,7 @@ module Plumb
     )
 
     get '/dashboard/cctray.xml' do
-      @jobs = STORAGE.jobs
+      @jobs = STORAGE.to_a
       erb :cctray
     end
 

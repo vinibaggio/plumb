@@ -7,12 +7,12 @@ module Plumb
       @storage_path = storage_path
     end
 
-    def jobs
+    def to_a
       JSON.parse(data).map {|attributes| Plumb::Job.new(attributes)}
     end
 
     def <<(job)
-      new_jobs = jobs
+      new_jobs = to_a
       new_jobs << job
       File.open(@storage_path, 'w') do |file|
         file << new_jobs.to_json
@@ -21,6 +21,7 @@ module Plumb
 
     def clear
       File.unlink @storage_path
+    rescue Errno::ENOENT
     end
 
     private
