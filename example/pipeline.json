@@ -1,0 +1,12 @@
+{
+  "order": [
+    [
+      {
+        "name": "unit-tests",
+        "repository_url": "/tmp/plumb_example.git",
+        "script": "rake"
+      }
+    ]
+  ]
+}
+

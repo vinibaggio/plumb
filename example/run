@@ -1,0 +1,15 @@
+#!/bin/bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_DIR=/tmp/plumb_example.git
+
+rm -rf $REPO_DIR
+mkdir -p $REPO_DIR
+cd $REPO_DIR
+git init
+echo 'task :default { puts "Success!" }' > Rakefile
+git add .
+git commit -m "Example Rakefile with default task"
+cd $SCRIPT_DIR
+cat pipeline.json | ../bin/plumb-pipeline-processor ../config/ci.json
+
